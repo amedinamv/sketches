@@ -1,5 +1,12 @@
 [
   {
+    "slug": "001-hi-vis-after-dark",
+    "title": "Hi-Vis After Dark",
+    "date": "2026-09-30",
+    "tags": ["webgpu", "three.js", "retroreflection"],
+    "description": "A headlamp in the dark. Retroreflective lettering stays dull grey until the beam lines up with your eye."
+  },
+  {
     "slug": "000-hello-webgpu",
     "title": "Hello WebGPU",
     "date": "2026-09-30",
