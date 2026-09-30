@@ -2,6 +2,8 @@
 
 Weekly creative-coding sketches: WebGPU, shaders, WebGL, motion and layout.
 
+Live: https://sketches-ochre.vercel.app
+
 Every push to `main` deploys to Vercel automatically. The site is plain static files: no framework and no build step.
 
 ## Structure
