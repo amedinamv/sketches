@@ -1,0 +1,9 @@
+[
+  {
+    "slug": "000-hello-webgpu",
+    "title": "Hello WebGPU",
+    "date": "2026-09-30",
+    "tags": ["webgpu", "wgsl", "shader"],
+    "description": "A full-screen animated fragment shader running on WebGPU, with a WebGL2 fallback."
+  }
+]
