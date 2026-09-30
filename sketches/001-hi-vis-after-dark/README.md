@@ -12,15 +12,17 @@ The wordmark is `TextGeometry` set in Helvetiker Bold, the typeface shipped with
 
 ## Controls
 
-- Move the pointer to steer the camera a little and aim the beam.
-- Click (or tap) away from the panel to fire a camera flash. Intensity spikes for 80ms, then fades.
+- Move the pointer, or drag on a touch screen, to steer the camera a little and aim the beam.
+- Click, or tap without dragging, to fire a camera flash. Intensity spikes for 80ms, then fades. The canvas uses pointer events and `touch-action: none`, so the page does not scroll or zoom under the gesture.
 - **Retroreflectivity** mixes the retro lobe in. At 0 the tape is ordinary dull plastic.
 - **Headlamp offset** slides the lamp off the camera axis, in metres. This is the control that kills the glow.
 - **Bloom** is the glare around the return.
 
-Add `?webgl` to force the WebGL2 backend (`WebGPURenderer({ forceWebGL: true })`). Retroreflection lives in the node lighting model, which that backend runs, and in the classic physical GLSL chunk (`USE_RETROREFLECTION`). The HUD reports `webgpu` or `webgl2`. If the renderer cannot start at all, a notice is shown, same pattern as sketch 000.
+Add `?webgl` to force the WebGL2 backend (`WebGPURenderer({ forceWebGL: true })`). The sketch also chooses that backend on its own when WebGPU is missing or only partial: no `navigator.gpu`, an adapter that never arrives, or an adapter without `float32-filterable`. That is the usual case on iOS Safari, and on Android Chrome devices whose WebGPU stack cannot run the node pipeline. Retroreflection lives in the node lighting model, which the WebGL2 backend runs, and in the classic physical GLSL chunk (`USE_RETROREFLECTION`). The HUD reports `webgpu` or `webgl2`. If the modules fail to load, or neither backend can draw a frame, a notice is shown instead of a blank canvas, same pattern as sketch 000.
 
-Pixel ratio is capped at 2, and the view resizes with the window.
+The camera stays at a 32° vertical field of view on a wide screen. On a narrow portrait screen it widens, up to 68°, just enough for the HI-VIS word to fit. On a phone the controls start collapsed behind a Controls button, inset from the safe area, so the panel does not sit on top of the scene.
+
+Pixel ratio is capped at 2 on desktop. On a small screen or a coarse pointer it is capped at 1.5, bloom is drawn at quarter resolution, and MSAA is off. The view follows the window and the visual viewport.
 
 ## References
 
