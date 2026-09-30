@@ -6,6 +6,7 @@
   <title>001 · Hi-Vis After Dark · Sketches</title>
   <meta name="description" content="A headlamp in the dark. Retroreflective lettering stays dull grey until the beam lines up with your eye." />
   <meta name="color-scheme" content="dark" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23000'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -99,8 +100,8 @@
       <input id="offset" type="range" min="0" max="2.5" step="0.01" value="0" />
     </label>
     <label>
-      <span>bloom <output id="bloom-out">0.60</output></span>
-      <input id="bloom" type="range" min="0" max="1.5" step="0.01" value="0.6" />
+      <span>bloom <output id="bloom-out">0.08</output></span>
+      <input id="bloom" type="range" min="0" max="1.5" step="0.01" value="0.08" />
     </label>
     <p class="hint">Move to aim the beam. Click to flash. Offset slides the lamp off the camera — the return should die while the pool of light remains.</p>
   </aside>
@@ -124,7 +125,7 @@
     // r186 shipped this as `retroreflectivity` (the PR said `retroreflective`).
     // The lobe only returns light when the lamp sits next to the camera.
     const retroUniform = uniform(1);
-    const params = { retro: 1, offset: 0, bloom: 0.6, intensity: 4200 };
+    const params = { retro: 1, offset: 0, bloom: 0.08, intensity: 190 };
 
     const pointer = { x: 0.5, y: 0.5 };
     const smooth = { x: 0.5, y: 0.5 };
@@ -219,7 +220,7 @@
       const forceWebGL = new URLSearchParams(location.search).has('webgl');
       const renderer = new THREE.WebGPURenderer({ antialias: true, alpha: false, forceWebGL });
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.05;
+      renderer.toneMappingExposure = 1;
       document.body.prepend(renderer.domElement);
 
       const scene = new THREE.Scene();
@@ -230,23 +231,24 @@
 
       // Barely-there sky so unlit shapes exist as silhouettes. Retroreflection
       // is direct-light only, so this fill never makes the tape blaze.
-      scene.add(new THREE.HemisphereLight(0x243044, 0x000000, 0.07));
+      scene.add(new THREE.HemisphereLight(0x243044, 0x000000, 0.035));
 
-      const lamp = new THREE.SpotLight(0xfff4e2, params.intensity, 0, 0.3, 0.45, 2);
+      const lamp = new THREE.SpotLight(0xfff4e2, params.intensity, 0, 0.32, 0.55, 2);
       const lampTarget = new THREE.Object3D();
       lamp.target = lampTarget;
       scene.add(lamp, lampTarget);
 
-      const wallMat = matte(0x0c0c0e, 0.96);
-      const boardMat = matte(0x17171a, 0.9);
+      const wallMat = matte(0x1a1a20, 0.94);
+      const boardMat = matte(0x26262e, 0.88);
       const backingMat = matte(0x100e0c, 0.92);
       const orangeMat = matte(0x8d4318, 0.78);
       const blackMat = matte(0x0a0a0c, 0.7);
 
       // Dull base colours. The return itself is the specular lobe, tinted
       // white for the vinyl and fluorescent yellow for the tape.
-      const vinylMat = retro(0x5c5c58, 0.22, 0xf3f3ee, 9);
-      const tapeMat = retro(0x5e5c40, 0.16, 0xd6ff4a, 11);
+      const vinylMat = retro(0x3a3a36, 0.32, 0xf7f7f2, 1.6);
+      const tapeMat = retro(0x3c3a2a, 0.24, 0xd2ff3a, 2);
+      tapeMat.side = THREE.DoubleSide;
 
       const wall = new THREE.Mesh(new THREE.BoxGeometry(22, 12, 0.4), wallMat);
       wall.position.set(0, 4.2, -0.2);
@@ -316,7 +318,7 @@
       }
 
       const cone = new THREE.Group();
-      cone.position.set(-1.85, 0, 2.15);
+      cone.position.set(-1.55, 0, 1.85);
       cone.rotation.y = 0.5;
       const base = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.05, 0.52), orangeMat);
       base.position.y = 0.025;
@@ -345,7 +347,7 @@
       scene.add(cone);
 
       const sign = new THREE.Group();
-      sign.position.set(1.95, 0, 1.45);
+      sign.position.set(1.72, 0, 1.25);
       sign.rotation.y = -0.28;
       const post = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.036, 0.72, 16), blackMat);
       post.position.y = 0.36;
@@ -382,7 +384,7 @@
 
       const scenePass = pass(scene, camera);
       const sceneColor = scenePass.getTextureNode();
-      const bloomPass = bloom(sceneColor, params.bloom, 0.42, 0.72);
+      const bloomPass = bloom(sceneColor, params.bloom, 0.22, 1);
       const pipeline = new THREE.RenderPipeline(renderer);
       pipeline.outputNode = sceneColor.add(bloomPass);
 
@@ -404,7 +406,7 @@
 
         camera.getWorldDirection(forward);
         right.crossVectors(forward, up).normalize();
-        lamp.position.copy(camera.position).addScaledVector(forward, 0.18).addScaledVector(right, params.offset);
+        lamp.position.copy(camera.position).addScaledVector(forward, 0.08).addScaledVector(right, params.offset);
         lampTarget.position.copy(aim);
         lampTarget.updateMatrixWorld();
 
