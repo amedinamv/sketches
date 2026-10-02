@@ -72,8 +72,8 @@
 .controls-toggle { flex: none; }
 
 .title {
-  flex: 1 1 auto;
-  min-width: 0;
+  flex: 0 1 auto;
+  min-width: 2.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
