@@ -27,7 +27,7 @@ One shared canvas or a CSS fallback for long grids, and product photos shot on c
 
 ## Art direction
 
-- **Type.** [Panchang](https://www.fontshare.com/fonts/panchang) (Fontshare) for titles. [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono) (Google Fonts) for price and meta.
+- **Type.** [Panchang](https://www.fontshare.com/fonts/panchang) (Fontshare) for titles. [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono) (Google Fonts) for price and meta. The frame is the light variant. "Hover a card" / "Scroll or tap a card" is the frame hint. The title and the line under it stay on the page.
 - **Palette.** Gallery Soft: bone `#F7F4EF`, warm grey `#E8E2D8`, ink `#2A2723`, secondary `#6F6A63`, slate `#3D5A80`, brass `#C9A227` (highlight only).
 - **Texture.** Faint SVG grain over the page.
 - **Technique.** [Paper Shaders](https://shaders.paper.design/fluted-glass) `FlutedGlass` from `@paper-design/shaders` via esm.sh, one WebGL canvas per card.

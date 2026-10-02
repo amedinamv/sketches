@@ -28,7 +28,7 @@ Load the real product mesh, keep the dock and the backdrop that recolours with t
 
 ## Art direction
 
-- **Type.** [Zodiak](https://www.fontshare.com/fonts/zodiak) (Fontshare) for the poster words and picker labels. [Geist Mono](https://fonts.google.com/specimen/Geist+Mono) (Google Fonts) for the spec line.
+- **Type.** [Zodiak](https://www.fontshare.com/fonts/zodiak) (Fontshare) for the poster words and picker labels. [Geist Mono](https://fonts.google.com/specimen/Geist+Mono) (Google Fonts) for the spec line. The frame is the light variant. "Drag to turn" is the frame hint. The picker stays in the sketch: the dock is the job.
 - **Palette.** Per finish. Prism `#E7E3DC` / `#17161A`. Gummy `#F4D9CE` / `#3A0D18` / `#FF5A2A`. Flock `#E4E1EC` / `#14163A`.
 - **Texture.** Fine grain baked into the poster canvas.
 - **Technique.** three.js r186 `MeshPhysicalMaterial` on a hand-built twisted superformula mesh, lit by the Poly Haven `studio_small_09` HDRI. Glass: transmission, IOR 1.52, dispersion, thin-film iridescence. Gummy: transmission with attenuation colour, sheen, and a view-dependent thickness tweak. Flock: sheen plus a generated fibre normal map. Pixel ratio capped at 1.75.

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-frame="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -26,10 +26,9 @@
       --signal: #2F4BFF;
       --opsz: 96;
 
-      /* Palette. --spec is muted, darkened so 11px labels clear WCAG AA. */
+      /* Palette. --spec is the warm grey darkened so 11px labels clear WCAG AA. */
       --clay: #E9E2D6;
       --ink: #1B1A17;
-      --muted: #8C857A;
       --spec: #5D5850;
 
       --display: "Bricolage Grotesque", "Arial Narrow", sans-serif;
@@ -49,7 +48,7 @@
       display: flex;
       flex-direction: column;
       padding:
-        max(16px, env(safe-area-inset-top))
+        calc(var(--frame-offset, calc(36px + env(safe-area-inset-top, 0px))) + 10px)
         max(22px, env(safe-area-inset-right))
         max(16px, env(safe-area-inset-bottom))
         max(22px, env(safe-area-inset-left));
@@ -75,7 +74,7 @@
     .skip {
       position: absolute;
       left: 12px;
-      top: 12px;
+      top: calc(var(--frame-offset, calc(36px + env(safe-area-inset-top, 0px))) + 8px);
       z-index: 6;
       padding: 8px 12px;
       background: var(--clay);
@@ -84,30 +83,6 @@
       transform: translateY(-160%);
     }
     .skip:focus { transform: none; outline: 2px solid var(--ink); }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--muted);
-      margin-bottom: clamp(6px, 1.2dvh, 16px);
-      font: 400 12px/1 var(--mono);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-    .back {
-      color: var(--ink);
-      text-decoration: none;
-      border-bottom: 1px solid transparent;
-    }
-    .back:hover { border-bottom-color: var(--ink); }
-    .back:focus-visible {
-      outline: 2px solid var(--ink);
-      outline-offset: 3px;
-    }
-    .kicker { margin: 0; color: var(--spec); }
 
     .sr-only {
       position: absolute;
@@ -215,10 +190,6 @@
 <body>
   <div class="grain" aria-hidden="true"></div>
   <a class="skip" href="#menu">Skip to menu</a>
-  <header>
-    <a class="back" href="/">Index</a>
-    <p class="kicker">002</p>
-  </header>
   <main>
     <h1 class="sr-only">Magnetic weight nav</h1>
     <nav id="menu" aria-label="Primary">
@@ -511,5 +482,6 @@
     }
     document.fonts.ready.then(() => { measure(); kick(); }).catch(() => {});
   </script>
+  <script src="/shared/frame.js"></script>
 </body>
 </html>

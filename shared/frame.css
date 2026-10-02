@@ -1,4 +1,6 @@
-/* Sketch frame. Tokens live here, on :host, so a sketch's variables never leak in. */
+/* Sketch frame. Tokens live here, on :host, so a sketch's variables never leak in.
+   Light and dark are the gallery pair. The sketch picks one with data-frame on <html>.
+   Control interiors are styled from frame.js (they stay in the light DOM). */
 
 :host {
   all: initial;
@@ -18,14 +20,12 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :host {
-    --ground: #141311;
-    --ink: #f3efe6;
-    --muted: #a8a298;
-    --line: #3a372f;
-    color-scheme: dark;
-  }
+:host([data-variant="dark"]) {
+  --ground: #141311;
+  --ink: #f3efe6;
+  --muted: #a8a298;
+  --line: #3a372f;
+  color-scheme: dark;
 }
 
 [hidden] { display: none !important; }
@@ -36,8 +36,10 @@
   box-sizing: border-box;
   background: var(--ground);
   color: var(--ink);
+  cursor: default;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .bar {
@@ -59,16 +61,28 @@
   line-height: 1;
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .num,
 .sep,
 .notes,
-.back { flex: none; }
+.back,
+.controls-toggle { flex: none; }
+
+.title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .job {
   flex: 0 1 auto;
   min-width: 0;
+  max-width: 34%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -78,7 +92,8 @@
 .sep { color: var(--muted); }
 
 .notes,
-.back {
+.back,
+.controls-toggle {
   font: inherit;
   color: var(--ink);
   background: none;
@@ -88,8 +103,13 @@
   cursor: pointer;
 }
 
-.notes { color: var(--muted); }
-.notes[aria-expanded="true"] { color: var(--ink); }
+.notes,
+.controls-toggle { color: var(--muted); }
+.notes[aria-expanded="true"],
+.controls-toggle[aria-expanded="true"] { color: var(--ink); }
+
+.controls-sep,
+.controls-toggle { display: none; }
 
 .bar :focus { outline: none; }
 .bar :focus-visible {
@@ -129,6 +149,16 @@
 .drawer p {
   margin: 0;
   max-width: 62ch;
+}
+
+@media (max-width: 640px) {
+  .job,
+  .job-sep { display: none !important; }
+}
+
+@media (max-width: 720px) {
+  :host([data-has-fields]) .controls-sep { display: inline; }
+  :host([data-has-fields]) .controls-toggle { display: inline; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -31,7 +31,7 @@ Behind real content, with the loop paused for reduced motion, and the WebGL2 pat
 
 ## Art direction
 
-- **Type.** None in the picture. The sketch's own notice uses the system mono. The gallery bar is separate and does not set this page's type.
+- **Type.** None in the picture. The sketch's own notice uses the system mono. The frame is the dark variant and does not set this page's type.
 - **Palette.** Night garden. Ground `#000000`. The loop passes through `#a7e758`, `#ca8002`, `#063546`, `#ffe7e7`.
 - **Texture.** A vignette in the shader. No grain.
 - **Signature motion.** The palette drifts on its own. It does not ease against a pointer.
