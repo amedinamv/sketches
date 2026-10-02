@@ -1,5 +1,35 @@
 [
   {
+    "slug": "004-material-picker",
+    "title": "Material Picker",
+    "date": "2026-10-02",
+    "tags": ["three.js", "webgl", "materials"],
+    "description": "One twisted, five-lobed form in three contemporary finishes: prism glass, gummy candy, and flock.",
+    "job": "Material selector",
+    "problem": "A material swatch is a flat chip. It cannot show how a finish bends light, glows, or eats it until you see it on a form.",
+    "interaction": "Pick Prism glass, Gummy, or Flock from a small dock. The object swaps material while the poster behind it recolours and spells the finish. It turns slowly on its own; drag to turn it.",
+    "technique": "three.js r186 MeshPhysicalMaterial on a hand-built twisted superformula mesh, lit by a Poly Haven HDRI. Glass uses transmission, dispersion, and thin-film iridescence over a canvas-texture poster, so the black type splits into spectra. Gummy uses attenuation, sheen, and a view-dependent thickness tweak. Flock uses sheen and a generated fibre normal map.",
+    "ship": "Rough preview. A real configurator would load the product mesh, keep the dock and the backdrop that recolours with the finish, and drop the poster word on small screens if it competes.",
+    "palette": ["#E7E3DC", "#17161A", "#F4D9CE", "#FF5A2A", "#14163A"],
+    "status": "preview",
+    "poster": "/sketches/004-material-picker/poster.png"
+  },
+  {
+    "slug": "003-flute-clear",
+    "title": "Flute Clear",
+    "date": "2026-10-02",
+    "tags": ["shader", "card", "hover"],
+    "description": "Craft beer cans behind fluted glass. Hover, scroll, or tap a card and the ribs clear, then price and CTA fade in.",
+    "job": "Card hover",
+    "problem": "A product grid shows every card at full volume, so nothing tells you which one you are looking at.",
+    "interaction": "Each photo sits behind ribbed glass, so only stripes of colour show. Hover clears the ribs and the price and CTA fade in. On touch, the card nearest the middle of the screen clears as you scroll, and a tap toggles it.",
+    "technique": "Paper Shaders FlutedGlass (@paper-design/shaders) on a WebGL canvas per card, eased out on hover or keyboard focus. An IntersectionObserver picks the centred card on phones. Unsplash photos.",
+    "ship": "Rough preview. In a shop: one shared canvas or a CSS fallback for long grids, and product photos shot on consistent backdrops so the stripes read as one family.",
+    "palette": ["#F7F4EF", "#E8E2D8", "#2A2723", "#6F6A63", "#3D5A80", "#C9A227"],
+    "status": "preview",
+    "poster": "/sketches/003-flute-clear/poster.png"
+  },
+  {
     "slug": "002-magnetic-weight-nav",
     "title": "Magnetic Weight Nav",
     "date": "2026-10-02",

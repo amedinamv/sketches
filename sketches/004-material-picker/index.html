@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Material Picker · Sketches (preview)</title>
+  <meta name="description" content="One twisted object, three contemporary materials. A product configurator study." />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://api.fontshare.com/v2/css?f[]=zodiak@300,400,300i,400i&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+    } }
+  </script>
+  <style>
+    :root {
+      --bg: #E7E3DC; --fg: #17161A; --muted: rgba(23,22,26,.56); --line: rgba(23,22,26,.16); --chip: rgba(255,255,255,.55);
+      --serif: "Zodiak", ui-serif, Georgia, serif;
+      --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      --ease: cubic-bezier(.2,.8,.2,1);
+      --st: env(safe-area-inset-top, 0px); --sb: env(safe-area-inset-bottom, 0px);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg);
+      transition: background .9s var(--ease), color .9s var(--ease); }
+    body { font: 400 11px/1.4 var(--mono); letter-spacing: .02em; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+    canvas#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+    canvas#gl.dragging { cursor: grabbing; }
+
+    .hud { position: fixed; z-index: 2; pointer-events: none; }
+    .hud a, .hud button { pointer-events: auto; }
+    .tr { top: calc(36px + 14px + var(--st)); right: 20px; text-align: right; } /* below the shared sketch bar */
+    .eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: 10px; color: var(--muted); }
+    .eyebrow b { font-weight: 500; color: var(--fg); }
+
+    .dock {
+      left: 50%; bottom: calc(22px + var(--sb)); transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 14px; width: max-content; max-width: calc(100vw - 24px);
+    }
+    .spec { display: flex; gap: 18px; color: var(--muted); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+    .spec span b { color: var(--fg); font-weight: 500; }
+    .picker {
+      pointer-events: auto; display: flex; gap: 4px; padding: 5px; border-radius: 999px;
+      background: var(--chip); border: 1px solid var(--line);
+      backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    }
+    .opt {
+      appearance: none; border: 0; background: transparent; color: inherit; cursor: pointer;
+      display: flex; align-items: center; gap: 10px; padding: 6px 16px 6px 6px; border-radius: 999px;
+      font: 400 17px/1 var(--serif); letter-spacing: -.01em; transition: background .4s var(--ease), color .4s var(--ease);
+    }
+    .opt i { width: 28px; height: 28px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+    .opt em { font-style: italic; }
+    .opt[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+    .opt:focus-visible { outline: 1px solid var(--fg); outline-offset: 2px; }
+    .sw-glass { background:
+      radial-gradient(circle at 34% 30%, #fff 0 18%, transparent 34%),
+      conic-gradient(from 200deg, #bfe8ff, #f7d1ff, #fff2b8, #c9ffe0, #bfe8ff); }
+    .sw-gummy { background: radial-gradient(circle at 34% 30%, #ffe2d2 0 12%, #ff7a4d 34%, #d8261a 72%, #8e1010 100%); }
+    .sw-velvet { background: radial-gradient(circle at 50% 50%, #141c7e 0 50%, #2a39c4 76%, #9fb0ff 100%); }
+    .sw-ceramic { background: radial-gradient(circle at 34% 30%, #fff 0 10%, #f1ece4 30%, #cfc6b8 100%); }
+
+    @media (max-width: 560px) {
+      .opt { padding: 5px 11px 5px 5px; font-size: 15px; gap: 7px; }
+      .opt i { width: 24px; height: 24px; }
+      .spec { gap: 12px; font-size: 9px; }
+      .tr { display: none; }
+    }
+    .loading { position: fixed; inset: 0; display: grid; place-items: center; z-index: 3; pointer-events: none;
+      font: 400 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); transition: opacity .6s; }
+    .ready .loading { opacity: 0; }
+  </style>
+</head>
+<body>
+  <canvas id="gl"></canvas>
+  <div class="hud tr eyebrow">Drag to turn</div>
+  <div class="hud dock">
+    <div class="spec" id="spec"></div>
+    <div class="picker" role="group" aria-label="Material">
+      <button class="opt" data-m="glass" aria-pressed="true"><i class="sw-glass"></i>Prism <em>glass</em></button>
+      <button class="opt" data-m="gummy" aria-pressed="false"><i class="sw-gummy"></i>Gummy</button>
+      <button class="opt" data-m="velvet" aria-pressed="false"><i class="sw-velvet"></i>Flock</button>
+    </div>
+  </div>
+  <div class="loading">Loading light</div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const canvas = document.getElementById('gl');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+    renderer.toneMapping = THREE.NeutralToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 50);
+    camera.position.set(0, 0, 9);
+
+    // ---------- Art direction per material ----------
+    const LOOKS = {
+      glass: {
+        word: 'Prism', bg: '#E7E3DC', ink: '#17161A', accent: null, // no colour behind: let the black type split into spectra
+        spec: [['IOR', '1.52'], ['Dispersion', '7.0'], ['Film', '380 nm']],
+      },
+      gummy: {
+        word: 'Gummy', bg: '#F4D9CE', ink: '#3A0D18', accent: '#FF5A2A',
+        spec: [['Transmission', '1.0'], ['Attenuation', '0.9'], ['Sheen', '0.8']],
+      },
+      velvet: {
+        word: 'Flock', bg: '#E4E1EC', ink: '#14163A', accent: '#C7F25A',
+        spec: [['Roughness', '0.95'], ['Sheen', '1.0'], ['Pile', 'Short']],
+      },
+    };
+
+    // ---------- The object: a soft, twisted, five-lobed column ----------
+    function shapePoint(u, v, out) {
+      // u: around (0..1), v: pole to pole (0..1)
+      const th = u * Math.PI * 2;
+      const ph = v * Math.PI;
+      const e = 0.62; // superellipse exponent: < 1 = pill / flattened caps
+      const s = Math.sin(ph), c = Math.cos(ph);
+      const rs = Math.sign(s) * Math.pow(Math.abs(s), e);
+      const yc = Math.sign(c) * Math.pow(Math.abs(c), e);
+      const y = yc * 1.55;
+      const twist = 1.9 * (y / 1.55);
+      const lobeFade = Math.pow(Math.abs(rs), 1.6); // lobes melt away toward the caps
+      const lobes = 1 + 0.17 * lobeFade * Math.cos(5 * (th + twist));
+      const waist = 1 - 0.10 * Math.exp(-Math.pow((y - 0.15) / 0.55, 2)) + 0.05 * Math.exp(-Math.pow((y + 0.9) / 0.5, 2));
+      const r = 1.0 * rs * lobes * waist;
+      // gentle lean so it isn't perfectly symmetric
+      const lean = 0.10 * Math.sin((y / 1.55) * Math.PI * 0.5);
+      out.set(r * Math.cos(th) + lean, y, r * Math.sin(th));
+      return out;
+    }
+    function buildGeometry(U = 280, V = 200) {
+      const pos = new Float32Array((U + 1) * (V + 1) * 3);
+      const nor = new Float32Array((U + 1) * (V + 1) * 3);
+      const uvs = new Float32Array((U + 1) * (V + 1) * 2);
+      const idx = [];
+      const p = new THREE.Vector3(), a = new THREE.Vector3(), b = new THREE.Vector3(), c2 = new THREE.Vector3(), d = new THREE.Vector3();
+      const h = 1e-3;
+      for (let j = 0; j <= V; j++) {
+        for (let i = 0; i <= U; i++) {
+          const u = i / U, v = j / V, k = (j * (U + 1) + i) * 3;
+          shapePoint(u, v, p);
+          pos[k] = p.x; pos[k + 1] = p.y; pos[k + 2] = p.z;
+          uvs[(j * (U + 1) + i) * 2] = u; uvs[(j * (U + 1) + i) * 2 + 1] = v;
+          let n;
+          if (j === 0 || j === V) n = new THREE.Vector3(0, j === 0 ? 1 : -1, 0);
+          else {
+            shapePoint(u + h, v, a); shapePoint(u - h, v, b); a.sub(b);
+            shapePoint(u, Math.min(1, v + h), c2); shapePoint(u, Math.max(0, v - h), d); c2.sub(d);
+            n = c2.cross(a).normalize();
+          }
+          nor[k] = n.x; nor[k + 1] = n.y; nor[k + 2] = n.z;
+        }
+      }
+      for (let j = 0; j < V; j++) for (let i = 0; i < U; i++) {
+        const A = j * (U + 1) + i, B = A + 1, C = A + U + 1, D = C + 1;
+        idx.push(A, C, B, B, C, D);
+      }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+      g.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+      g.setIndex(idx);
+      return g;
+    }
+    const geo = buildGeometry();
+    // make sure normals face outward (flip if the winding came out inside-out)
+    {
+      const n = geo.attributes.normal, P = geo.attributes.position; let dot = 0;
+      for (let i = 0; i < P.count; i += 97) dot += n.getX(i) * P.getX(i) + n.getY(i) * P.getY(i) + n.getZ(i) * P.getZ(i);
+      if (dot < 0) { for (let i = 0; i < n.array.length; i++) n.array[i] *= -1; const ix = geo.index.array; for (let i = 0; i < ix.length; i += 3) { const t = ix[i + 1]; ix[i + 1] = ix[i + 2]; ix[i + 2] = t; } }
+    }
+
+    // ---------- Flock fibre: a tiny tileable noise normal map ----------
+    function fibreMap(size = 256) {
+      const c = document.createElement('canvas'); c.width = c.height = size;
+      const g = c.getContext('2d'); const im = g.createImageData(size, size);
+      for (let i = 0; i < im.data.length; i += 4) {
+        const a = Math.random() * Math.PI * 2, r = Math.random() * 0.9;
+        im.data[i] = 128 + Math.cos(a) * r * 127; im.data[i + 1] = 128 + Math.sin(a) * r * 127; im.data[i + 2] = 255; im.data[i + 3] = 255;
+      }
+      g.putImageData(im, 0, 0);
+      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(10, 7);
+      return t;
+    }
+
+    // ---------- Materials ----------
+    const MATS = {
+      glass: new THREE.MeshPhysicalMaterial({
+        color: 0xffffff, metalness: 0, roughness: 0.03,
+        transmission: 1, thickness: 2.2, ior: 1.52, dispersion: 7.0,
+        iridescence: 0.4, iridescenceIOR: 1.35, iridescenceThicknessRange: [180, 520],
+        specularIntensity: 1, envMapIntensity: 1.0,
+        attenuationColor: new THREE.Color('#eef3ff'), attenuationDistance: 6,
+      }),
+      gummy: new THREE.MeshPhysicalMaterial({
+        color: 0xffffff, metalness: 0, roughness: 0.22,
+        transmission: 1, thickness: 1.7, ior: 1.42,
+        attenuationColor: new THREE.Color('#ff5a1f'), attenuationDistance: 0.9,
+        emissive: new THREE.Color('#ff3b0a'), emissiveIntensity: 0.06,
+        sheen: 0.8, sheenColor: new THREE.Color('#ffc2a3'), sheenRoughness: 0.55,
+        clearcoat: 0.55, clearcoatRoughness: 0.22, specularIntensity: 0.7, envMapIntensity: 1.0,
+      }),
+      velvet: new THREE.MeshPhysicalMaterial({
+        color: new THREE.Color('#1a2398'), metalness: 0, roughness: 0.95,
+        sheen: 1, sheenColor: new THREE.Color('#9fb0ff'), sheenRoughness: 0.4,
+        normalMap: fibreMap(), normalScale: new THREE.Vector2(0.35, 0.35),
+        specularIntensity: 0.15, envMapIntensity: 0.9,
+      }),
+    };
+
+    // Gummy depth: three.js uses one constant thickness, so fake a real volume by making the
+    // core (facing the camera) thick and the silhouette thin. Rims glow light orange, core goes deep red.
+    MATS.gummy.onBeforeCompile = (sh) => {
+      sh.fragmentShader = sh.fragmentShader.replace('#include <transmission_fragment>',
+        '#include <transmission_fragment>'.replace('', '') );
+      sh.fragmentShader = sh.fragmentShader.replace('#include <transmission_fragment>', THREE.ShaderChunk.transmission_fragment.replace(
+        'material.thickness = thickness;',
+        'float facing = saturate( dot( normalize( normal ), normalize( vViewPosition ) ) );\n\tmaterial.thickness = thickness * mix( 0.12, 1.5, pow( facing, 1.2 ) );'));
+    };
+    MATS.gummy.customProgramCacheKey = () => 'gummy-volume';
+
+    const obj = new THREE.Mesh(geo, MATS.glass);
+    const pivot = new THREE.Group();
+    pivot.add(obj);
+    pivot.rotation.z = -0.18;
+    scene.add(pivot);
+
+    // ---------- Backdrop: a poster the glass can refract ----------
+    const posterCanvas = [document.createElement('canvas'), document.createElement('canvas')];
+    const posterTex = posterCanvas.map((c) => { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; });
+    const posterMat = new THREE.ShaderMaterial({
+      uniforms: { a: { value: posterTex[0] }, b: { value: posterTex[1] }, k: { value: 0 } },
+      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }',
+      fragmentShader: 'uniform sampler2D a; uniform sampler2D b; uniform float k; varying vec2 vUv; void main(){ vec4 c = mix(texture2D(a,vUv), texture2D(b,vUv), k); gl_FragColor = c;\n#include <colorspace_fragment>\n}',
+      depthWrite: false, toneMapped: false,
+    });
+    const poster = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), posterMat);
+    poster.position.z = -3.2;
+    scene.add(poster);
+
+    let W = 1, H = 1;
+    function drawPoster(c, look) {
+      const dpr = Math.min(devicePixelRatio, 2);
+      const scale = Math.min(1, 2400 / Math.max(W, H) / dpr);
+      c.width = Math.round(W * dpr * scale); c.height = Math.round(H * dpr * scale);
+      const g = c.getContext('2d');
+      const w = c.width, h = c.height, m = Math.min(w, h);
+      g.fillStyle = look.bg; g.fillRect(0, 0, w, h);
+      // centre the poster on wherever the object actually sits on screen
+      camera.updateMatrixWorld();
+      const sp = pivot.position.clone().project(camera);
+      const cx = w / 2, cy = (0.5 - sp.y / 2) * h;
+      const portrait = w / h < 0.8;
+      const rg = g.createRadialGradient(cx, cy, 0, cx, cy, m * 0.6);
+      rg.addColorStop(0, 'rgba(255,255,255,.55)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = rg; g.fillRect(0, 0, w, h);
+      // giant word in Zodiak italic, right behind the object so it refracts.
+      // Landscape: horizontal. Portrait: turned 90° so it runs the height of the phone.
+      const along = portrait ? h * 0.86 : w * 0.92;   // max length of the word
+      const across = portrait ? w * 0.62 : h * 0.46;  // max type size
+      g.save(); g.translate(cx, cy); if (portrait) g.rotate(-Math.PI / 2);
+      g.fillStyle = look.ink; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+      let size = across;
+      g.font = `italic 300 ${size}px Zodiak, Georgia, serif`;
+      const tw = g.measureText(look.word).width;
+      if (tw > along) { size *= along / tw; g.font = `italic 300 ${size}px Zodiak, Georgia, serif`; }
+      g.fillText(look.word, 0, size * 0.33);
+      // hairlines framing the word
+      g.globalAlpha = 0.18;
+      const L = Math.max(w, h) * 2, t = Math.max(1, m * 0.0012);
+      g.fillRect(-L / 2, size * 0.42, L, t);
+      g.fillRect(-L / 2, -size * 0.62, L, t);
+      g.globalAlpha = 1;
+      g.restore();
+      // accent disc: lives behind the object, only ever seen through it
+      if (look.accent) {
+        g.fillStyle = look.accent;
+        g.beginPath(); g.arc(cx, cy - m * 0.02, m * (look.disc || 0.13), 0, Math.PI * 2); g.fill();
+      }
+      // fine grain
+      const n = g.getImageData(0, 0, w, h), d = n.data;
+      for (let i = 0; i < d.length; i += 4) { const r = (Math.random() - 0.5) * 10; d[i] += r; d[i + 1] += r; d[i + 2] += r; }
+      g.putImageData(n, 0, 0);
+    }
+
+    let current = 'glass', front = 0, fade = { t: 1, from: 0 };
+    function setLook(name, instant = false) {
+      const look = LOOKS[name];
+      const back = 1 - front;
+      drawPoster(posterCanvas[back], look);
+      posterTex[back].dispose(); // canvas size may have changed; WebGL2 textures are immutable in size
+      posterTex[back].needsUpdate = true;
+      posterMat.uniforms.a.value = posterTex[front];
+      posterMat.uniforms.b.value = posterTex[back];
+      posterMat.uniforms.k.value = 0;
+      fade = { t: instant || reduce ? 1 : 0 };
+      front = back;
+      document.documentElement.style.setProperty('--bg', look.bg);
+      document.documentElement.style.setProperty('--fg', look.ink);
+      document.documentElement.style.setProperty('--muted', look.ink + '8F');
+      document.documentElement.style.setProperty('--line', look.ink + '29');
+      document.getElementById('spec').innerHTML = look.spec.map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
+      obj.material = MATS[name];
+      current = name;
+      document.querySelectorAll('.opt').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.m === name)));
+    }
+
+    function resize() {
+      W = innerWidth; H = innerHeight;
+      renderer.setSize(W, H, false);
+      camera.aspect = W / H;
+      // keep the object a similar size on portrait screens
+      camera.fov = W / H < 0.8 ? 40 : 28;
+      camera.updateProjectionMatrix();
+      const dist = camera.position.z - poster.position.z;
+      const ph = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * dist;
+      poster.scale.set(ph * camera.aspect, ph, 1);
+      pivot.position.y = W / H < 0.8 ? 0.3 : 0.18;
+      const s = W / H < 0.8 ? 0.82 : 1.0;
+      pivot.scale.setScalar(s);
+      setLook(current, true);
+    }
+
+    // ---------- Light ----------
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const hdr = await new HDRLoader().loadAsync('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr');
+    hdr.mapping = THREE.EquirectangularReflectionMapping;
+    scene.environment = hdr;
+    scene.environmentRotation.y = 1.1;
+    scene.environmentIntensity = 1.0;
+    const key = new THREE.DirectionalLight(0xffffff, 1.4);
+    key.position.set(-3, 4, 3);
+    scene.add(key);
+
+    await document.fonts.load('italic 300 100px Zodiak').catch(() => {});
+    resize();
+    addEventListener('resize', resize);
+
+    // ---------- Interaction: idle spin + drag with inertia ----------
+    let vel = 0, velX = 0, drag = null, tiltX = 0;
+    const idle = reduce ? 0 : 0.0035;
+    canvas.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, t: performance.now() }; canvas.setPointerCapture(e.pointerId); canvas.classList.add('dragging'); });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      obj.rotation.y += dx * 0.008; tiltX = THREE.MathUtils.clamp(tiltX + dy * 0.004, -0.6, 0.6);
+      vel = dx * 0.008; drag.x = e.clientX; drag.y = e.clientY;
+    });
+    const end = () => { drag = null; canvas.classList.remove('dragging'); };
+    canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+
+    document.querySelectorAll('.opt').forEach((b) => b.addEventListener('click', () => { if (b.dataset.m !== current) setLook(b.dataset.m); }));
+
+    const clock = new THREE.Timer();
+    function frame() {
+      clock.update(); const dt = Math.min(clock.getDelta(), 0.05) * 60;
+      if (!drag) { vel += (idle - vel) * 0.04 * dt; obj.rotation.y += vel * dt; tiltX *= Math.pow(0.97, dt); }
+      pivot.rotation.x = tiltX * 0.6;
+      obj.position.y = reduce ? 0 : Math.sin(clock.getElapsed() * 0.6) * 0.04;
+      if (fade.t < 1) { fade.t = Math.min(1, fade.t + 0.035 * dt); posterMat.uniforms.k.value = 1 - Math.pow(1 - fade.t, 3); }
+      else posterMat.uniforms.k.value = 1;
+      renderer.render(scene, camera);
+      requestAnimationFrame(frame);
+    }
+    frame();
+    document.documentElement.classList.add('ready');
+    window.__mp = { setLook, obj, pivot, renderer, MATS, LOOKS, scene };
+  </script>
+  <script src="/shared/frame.js"></script>
+</body>
+</html>

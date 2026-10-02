@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Flute Clear · Sketches (preview)</title>
+  <meta name="description" content="Craft beer cans behind fluted glass. Hover, scroll or tap to clear the ribs." />
+  <meta name="color-scheme" content="light" />
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://api.fontshare.com/v2/css?f[]=panchang@300,500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bone: #F7F4EF;
+      --warm: #E8E2D8;
+      --ink: #2A2723;
+      --ink-2: #6F6A63;
+      --slate: #3D5A80;
+      --brass: #C9A227;
+      --hair: rgba(42, 39, 35, .14);
+      --wide: "Panchang", "Archivo", ui-sans-serif, system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      --ease: cubic-bezier(.2, .8, .2, 1);
+      --pad: clamp(16px, 4vw, 56px);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bone); color: var(--ink); }
+    body {
+      min-height: 100svh;
+      font: 400 13px/1.5 var(--mono);
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* faint grain over everything */
+    body::after {
+      content: ""; position: fixed; inset: -50%; pointer-events: none; z-index: 10;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.16 0 0 0 0 0.15 0 0 0 0 0.14 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: .16; mix-blend-mode: multiply;
+    }
+    a { color: inherit; }
+
+
+    header.intro {
+      /* 36px clears the shared sketch bar (shared/frame.js) */
+      padding: calc(36px + env(safe-area-inset-top, 0px) + clamp(36px, 7vw, 88px)) var(--pad) clamp(24px, 4vw, 44px);
+      display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 24px;
+      max-width: 1080px; margin: 0 auto;
+    }
+    h1 {
+      margin: 0; font: 300 clamp(26px, 4.6vw, 58px)/1.02 var(--wide); letter-spacing: -.01em;
+      text-transform: uppercase;
+    }
+    h1 em { font-style: normal; font-weight: 500; }
+    .lede { margin: 0; max-width: 30ch; color: var(--ink-2); font-size: 12px; text-align: right; }
+    .lede b { font-weight: 500; color: var(--ink); }
+
+    .grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(12px, 2.4vw, 32px);
+      padding: 0 var(--pad) clamp(40px, 7vw, 96px);
+      max-width: 1080px; margin: 0 auto;
+    }
+
+    .card { position: relative; outline: none; cursor: pointer; }
+    .media {
+      position: relative; aspect-ratio: 4 / 5; overflow: hidden;
+      background: var(--warm); border-radius: 2px;
+    }
+    .media img.base {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+      filter: blur(14px) saturate(1.05); transform: scale(1.1); /* only visible as a no-WebGL fallback */
+    }
+    .media .gl { position: absolute; inset: 0 -14px; } /* overscan: hides the partial rib at the pane edges */
+    .media .gl canvas { display: block; }
+    /* glass edge: a hairline + inner bevel so the pane reads as an object */
+    .media::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.35), inset 0 1px 0 rgba(255,255,255,.5);
+      transition: opacity .5s var(--ease);
+    }
+    .card.is-clear .media::after { opacity: 0; }
+
+    .idx {
+      position: absolute; top: 12px; left: 12px; z-index: 2;
+      font-size: 10px; letter-spacing: .1em; color: rgba(247,244,239,.92);
+      mix-blend-mode: normal; text-shadow: 0 1px 8px rgba(0,0,0,.18);
+    }
+    .tag {
+      position: absolute; top: 12px; right: 12px; z-index: 2;
+      font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+      padding: 4px 8px 3px; border-radius: 99px; background: rgba(247,244,239,.86); color: var(--ink);
+      opacity: 0; transform: translateY(-4px); transition: opacity .4s var(--ease) .12s, transform .4s var(--ease) .12s;
+    }
+    .tag i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--brass); margin-right: 6px; vertical-align: 1px; }
+    .card.is-clear .tag { opacity: 1; transform: none; }
+
+    .info {
+      display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; align-items: start;
+      padding: 14px 2px 0;
+    }
+    .title { margin: 0; font: 500 clamp(12px, 1.25vw, 15px)/1.15 var(--wide); text-transform: uppercase; letter-spacing: .01em; }
+    .meta { margin: 0; grid-column: 1; color: var(--ink-2); font-size: 11px; letter-spacing: .02em; }
+    .buy {
+      grid-column: 2; grid-row: 1 / span 2; display: flex; align-items: center; gap: 14px;
+      opacity: 0; transform: translateY(6px);
+      transition: opacity .35s var(--ease), transform .45s var(--ease);
+    }
+    .card.is-clear .buy { opacity: 1; transform: none; transition-delay: .18s, .18s; }
+    .price { font: 500 13px/1 var(--mono); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+    .cta {
+      appearance: none; border: 0; cursor: pointer;
+      font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase;
+      color: var(--bone); background: var(--ink); padding: 11px 14px 10px; border-radius: 99px;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: background .25s var(--ease);
+    }
+    .cta:hover, .cta:focus-visible { background: var(--slate); outline: none; }
+    .cta svg { width: 10px; height: 10px; }
+    .cta .short { display: none; }
+    .card:focus-visible .media { outline: 1px solid var(--slate); outline-offset: 4px; }
+
+    footer {
+      max-width: 1080px; margin: 0 auto; padding: 0 var(--pad) calc(32px + env(safe-area-inset-bottom, 0px));
+      display: flex; justify-content: space-between; gap: 16px; color: var(--ink-2); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    }
+
+    .hint-touch { display: none; }
+    @media (hover: none) { .hint-touch { display: inline; } .hint-hover { display: none; } }
+
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; gap: 28px; padding-bottom: 30vh; }
+      .media { aspect-ratio: 1 / 1; }
+        .meta { white-space: nowrap; }
+      header.intro { grid-template-columns: 1fr; gap: 14px; padding-top: calc(36px + env(safe-area-inset-top, 0px) + 28px); }
+      .lede { text-align: left; }
+      .info { padding-top: 12px; }
+      .title { font-size: 13px; }
+      .meta { font-size: 11px; }
+      .cta { padding: 10px 12px 9px; }
+      .cta .long { display: none; }
+      .cta .short { display: inline; }
+      footer { flex-direction: column; gap: 4px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .buy, .tag, .media::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="intro">
+    <h1>Fresh cans,<br /><em>behind glass</em></h1>
+    <p class="lede"><span class="hint-hover"><b>Hover</b> a card</span><span class="hint-touch"><b>Scroll</b> or tap a card</span> to clear the fluted pane. Colour first, label on intent.</p>
+  </header>
+
+  <main class="grid" id="grid">
+    <article class="card" tabindex="0" data-img="img/sour.jpg">
+      <div class="media"><img class="base" src="img/sour.jpg" alt="Teal can on a saturated yellow backdrop" /><div class="gl"></div>
+        <span class="idx">01</span><span class="tag"><i></i>Fresh batch</span></div>
+      <div class="info">
+        <h2 class="title">Session Sour</h2>
+        <p class="meta">Guava &amp; lime · 4.2% · 355 ml</p>
+        <div class="buy"><span class="price">€ 4.80</span><button class="cta" type="button"><span class="long">Add to crate</span><span class="short">Add</span><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1 5h8M5.5 1.5 9 5 5.5 8.5"/></svg></button></div>
+      </div>
+    </article>
+    <article class="card" tabindex="0" data-img="img/lager.jpg">
+      <div class="media"><img class="base" src="img/lager.jpg" alt="Lilac aluminium can on a violet backdrop" /><div class="gl"></div>
+        <span class="idx">02</span><span class="tag"><i></i>Small run</span></div>
+      <div class="info">
+        <h2 class="title">Dark Lager</h2>
+        <p class="meta">Bohemian · 5.0% · 330 ml</p>
+        <div class="buy"><span class="price">€ 4.20</span><button class="cta" type="button"><span class="long">Add to crate</span><span class="short">Add</span><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1 5h8M5.5 1.5 9 5 5.5 8.5"/></svg></button></div>
+      </div>
+    </article>
+    <article class="card" tabindex="0" data-img="img/gose.jpg">
+      <div class="media"><img class="base" src="img/gose.jpg" alt="Colour-block can on a coral backdrop" /><div class="gl"></div>
+        <span class="idx">03</span><span class="tag"><i></i>Last 40</span></div>
+      <div class="info">
+        <h2 class="title">Fruited Gose</h2>
+        <p class="meta">Blood orange · 4.6% · 355 ml</p>
+        <div class="buy"><span class="price">€ 5.10</span><button class="cta" type="button"><span class="long">Add to crate</span><span class="short">Add</span><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1 5h8M5.5 1.5 9 5 5.5 8.5"/></svg></button></div>
+      </div>
+    </article>
+    <article class="card" tabindex="0" data-img="img/hazy.jpg">
+      <div class="media"><img class="base" src="img/hazy.jpg" alt="Yellow hazy IPA can on a blue backdrop" /><div class="gl"></div>
+        <span class="idx">04</span><span class="tag"><i></i>New</span></div>
+      <div class="info">
+        <h2 class="title">Hazy IPA</h2>
+        <p class="meta">Citra · Mosaic · 6.2% · 355 ml</p>
+        <div class="buy"><span class="price">€ 5.40</span><button class="cta" type="button"><span class="long">Add to crate</span><span class="short">Add</span><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1 5h8M5.5 1.5 9 5 5.5 8.5"/></svg></button></div>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <span>Glass: Paper Shaders · FlutedGlass</span>
+    <span>Photos: Unsplash</span>
+  </footer>
+
+  <script type="module">
+    import {
+      ShaderMount, flutedGlassFragmentShader, getShaderColorFromString,
+      ShaderFitOptions, GlassGridShapes, GlassDistortionShapes, defaultObjectSizing,
+    } from 'https://esm.sh/@paper-design/shaders@0.0.81';
+
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const touch = matchMedia('(hover: none)').matches;
+
+    // Two poses of the same pane. Everything numeric is tweened between them.
+    const FLUTED = { distortion: 1, blur: 0.8, edges: 0, highlights: 0, shadows: 0.28, shift: 0.12, stretch: 0.15, grainMixer: 0.06, scale: 1.14 };
+    const CLEAR  = { distortion: 0, blur: 0,    edges: 0,    highlights: 0,    shadows: 0,    shift: 0,    stretch: 0,    grainMixer: 0,    scale: 1.0 };
+    const KEYS = Object.keys(FLUTED);
+
+    const ribSize = () => (innerWidth < 640 ? 0.84 : 0.87); // larger = fewer, wider ribs
+
+    function uniformsFor(p) {
+      return {
+        u_distortion: p.distortion, u_blur: p.blur, u_edges: p.edges, u_highlights: p.highlights,
+        u_shadows: p.shadows, u_shift: p.shift, u_stretch: p.stretch, u_grainMixer: p.grainMixer,
+        u_scale: p.scale,
+      };
+    }
+
+    const loadImg = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+
+    const cards = [...document.querySelectorAll('.card')];
+    const states = [];
+
+    for (const card of cards) {
+      const img = await loadImg(card.dataset.img).catch(() => null);
+      if (!img) continue;
+      const host = card.querySelector('.gl');
+      let mount;
+      try {
+        mount = new ShaderMount(host, flutedGlassFragmentShader, {
+          u_image: img,
+          u_colorBack: getShaderColorFromString('#E8E2D800'),
+          u_colorShadow: getShaderColorFromString('#2A2723'),
+          u_colorHighlight: getShaderColorFromString('#FFFDF8'),
+          u_size: ribSize(),
+          u_angle: 0,
+          u_shape: GlassGridShapes.lines,
+          u_distortionShape: GlassDistortionShapes.lens,
+          u_marginLeft: 0, u_marginRight: 0, u_marginTop: 0, u_marginBottom: 0,
+          u_grainOverlay: 0.06,
+          ...uniformsFor(FLUTED),
+          u_fit: ShaderFitOptions.cover,
+          u_rotation: 0, u_originX: 0.5, u_originY: 0.5, u_offsetX: 0, u_offsetY: 0,
+          u_worldWidth: 0, u_worldHeight: 0,
+        }, undefined, 0, 0, 2, undefined, ['u_image']);
+      } catch (e) { console.warn('FlutedGlass failed, using CSS fallback', e); continue; }
+      card.querySelector('img.base').style.visibility = 'hidden';
+      states.push({ card, mount, t: 0, target: 0, raf: 0 });
+    }
+
+    // Snappy clear (fast-out), slower re-flute so the glass "settles" back.
+    const easeOutExpo = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
+    const easeInOut = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+
+    function animate(s) {
+      cancelAnimationFrame(s.raf);
+      const from = s.t, to = s.target;
+      const dur = reduce ? 1 : (to > from ? 520 : 760);
+      const start = performance.now();
+      const step = (now) => {
+        const k = Math.min(1, (now - start) / dur);
+        const e = to > from ? easeOutExpo(k) : easeInOut(k);
+        s.t = from + (to - from) * e;
+        const p = {};
+        for (const key of KEYS) p[key] = FLUTED[key] + (CLEAR[key] - FLUTED[key]) * s.t;
+        s.mount.setUniforms(uniformsFor(p));
+        if (k < 1) s.raf = requestAnimationFrame(step);
+      };
+      s.raf = requestAnimationFrame(step);
+    }
+
+    function setClear(s, on) {
+      if (s.target === (on ? 1 : 0)) return;
+      s.target = on ? 1 : 0;
+      s.card.classList.toggle('is-clear', on);
+      animate(s);
+    }
+
+    for (const s of states) {
+      const { card } = s;
+      if (!touch) {
+        card.addEventListener('pointerenter', () => setClear(s, true));
+        card.addEventListener('pointerleave', () => setClear(s, false));
+        card.addEventListener('focus', () => setClear(s, true));
+        card.addEventListener('blur', (e) => { if (!card.contains(e.relatedTarget)) setClear(s, false); });
+      }
+    }
+
+    // Touch: no hover, so the card nearest the viewport's vertical centre clears itself.
+    // IntersectionObserver tracks which cards are on screen; on scroll we pick the closest
+    // centre among those. Tapping toggles as a backup (override lasts until the centre card changes).
+    if (touch) {
+      const visible = new Set();
+      let autoPick = null, override = null, ticking = false;
+      const apply = () => {
+        const active = override ? override.s : autoPick;
+        const on = override ? override.on : true;
+        for (const o of states) setClear(o, o === active && on);
+      };
+      const pick = () => {
+        ticking = false;
+        const mid = innerHeight / 2;
+        let best = null, bestD = Infinity;
+        for (const s of visible) {
+          const r = s.card.querySelector('.media').getBoundingClientRect();
+          const d = Math.abs(r.top + r.height / 2 - mid);
+          if (d < bestD) { bestD = d; best = s; }
+        }
+        // only auto-clear a card whose photo actually spans the centre band
+        if (best) {
+          const r = best.card.querySelector('.media').getBoundingClientRect();
+          if (!(r.top < mid + r.height * 0.25 && r.bottom > mid - r.height * 0.25)) best = null;
+        }
+        if (best !== autoPick) { autoPick = best; override = null; }
+        apply();
+      };
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          const s = states.find((o) => o.card === e.target);
+          e.isIntersecting ? visible.add(s) : visible.delete(s);
+        }
+        pick();
+      }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+      for (const s of states) io.observe(s.card);
+      addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(pick); } }, { passive: true });
+      for (const s of states) {
+        s.card.addEventListener('click', (e) => {
+          if (e.target.closest('.cta')) return;
+          const isOn = s.target === 1;
+          override = { s, on: !isOn };
+          apply();
+        });
+      }
+    }
+
+    addEventListener('resize', () => { for (const s of states) s.mount.setUniforms({ u_size: ribSize() }); });
+
+    // hook for screenshots / debugging
+    window.__flute = { states, setClear: (i, on) => setClear(states[i], on), ready: true };
+    document.documentElement.dataset.ready = '1';
+  </script>
+  <script src="/shared/frame.js"></script>
+</body>
+</html>
