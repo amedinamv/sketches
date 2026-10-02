@@ -38,7 +38,7 @@
     #panel-toggle {
       display: none;
       position: fixed; z-index: 4;
-      top: calc(12px + var(--safe-top));
+      top: calc(12px + var(--safe-top) + 36px);
       left: calc(12px + var(--safe-left));
       margin: 0; padding: 8px 12px;
       border: 1px solid var(--line); border-radius: 999px;
@@ -48,7 +48,7 @@
     #panel-toggle:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
     .panel {
       position: fixed; z-index: 2;
-      top: calc(16px + var(--safe-top));
+      top: calc(16px + var(--safe-top) + 36px);
       left: calc(16px + var(--safe-left));
       width: min(272px, calc(100vw - 32px - var(--safe-left) - var(--safe-right)));
       padding: 14px 14px 12px; border: 1px solid var(--line); border-radius: 10px;
@@ -90,7 +90,7 @@
     .hud a:hover { text-decoration: underline; }
     .notice {
       position: fixed; z-index: 5;
-      top: calc(18px + var(--safe-top));
+      top: calc(18px + var(--safe-top) + 36px);
       left: 50%; transform: translateX(-50%); max-width: min(90vw, 560px);
       padding: 10px 14px; border: 1px solid #2a2a2c; border-radius: 8px; background: rgba(11, 11, 12, .9);
       font: 400 12px/1.5 ui-monospace, "SF Mono", Menlo, monospace; color: #bdbdb8; text-align: center;
@@ -100,7 +100,7 @@
       #panel-toggle { display: block; }
       .panel {
         display: none;
-        top: calc(52px + var(--safe-top));
+        top: calc(52px + var(--safe-top) + 36px);
         left: calc(12px + var(--safe-left));
         max-height: min(62dvh, calc(100dvh - 80px - var(--safe-top) - var(--safe-bottom)));
         overflow: auto;
@@ -206,7 +206,7 @@
     let moved = false;
     let canvasEl = null;
 
-    const onUi = (event) => event.target.closest && event.target.closest('#panel, #panel-toggle, a, #notice');
+    const onUi = (event) => event.target.closest && event.target.closest('#panel, #panel-toggle, #sketch-frame, a, #notice');
 
     function setPointer(clientX, clientY) {
       const rect = canvasEl ? canvasEl.getBoundingClientRect() : { left: 0, top: 0, width: innerWidth, height: innerHeight };
@@ -245,7 +245,7 @@
     }
 
     document.addEventListener('touchmove', (event) => {
-      if (event.target.closest && event.target.closest('#panel, #panel-toggle')) return;
+      if (event.target.closest && event.target.closest('#panel, #panel-toggle, #sketch-frame')) return;
       event.preventDefault();
     }, { passive: false });
     for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
@@ -610,5 +610,6 @@
       backendLabel.textContent = 'unsupported';
     }
   </script>
+  <script src="/shared/frame.js"></script>
 </body>
 </html>

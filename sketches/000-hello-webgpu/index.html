@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>000 · Hello WebGPU · Sketches</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230b0b0c'/%3E%3C/svg%3E" />
   <meta name="color-scheme" content="dark" />
   <style>
     html, body { margin: 0; height: 100%; background: #0b0b0c; color: #ededea; overflow: hidden; }
@@ -16,7 +17,7 @@
     .hud a { color: inherit; pointer-events: auto; text-decoration: none; }
     .hud a:hover { text-decoration: underline; }
     .notice {
-      position: fixed; top: 18px; left: 50%; transform: translateX(-50%); max-width: min(90vw, 520px);
+      position: fixed; top: calc(18px + 36px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); max-width: min(90vw, 520px);
       padding: 10px 14px; border: 1px solid #2a2a2c; border-radius: 8px; background: rgba(11, 11, 12, .85);
       font: 400 12px/1.5 ui-monospace, "SF Mono", Menlo, monospace; color: #bdbdb8; text-align: center;
     }
@@ -195,5 +196,6 @@
       if (!fallback) backendLabel.textContent = 'unsupported';
     }
   </script>
+  <script src="/shared/frame.js"></script>
 </body>
 </html>
