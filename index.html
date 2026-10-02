@@ -4,109 +4,584 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sketches</title>
-  <meta name="description" content="Weekly creative-coding sketches: WebGPU, shaders, motion, layout." />
-  <meta name="color-scheme" content="dark" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+  <meta name="description" content="An index of weekly studies in WebGPU, shaders, motion, and layout." />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f3efe6" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#141311" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f3efe6'/%3E%3Cpath d='M7 23h18' stroke='%231c1a17' stroke-width='1.5'/%3E%3C/svg%3E" />
   <style>
-    :root {
-      --bg: #0b0b0c;
-      --fg: #ededea;
-      --muted: #8a8a86;
-      --line: #1f1f21;
-      --accent: #c8ff5a;
-      --serif: "Instrument Serif", ui-serif, Georgia, serif;
-      --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-      --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    @font-face {
+      font-family: "Geist";
+      src: url("shared/fonts/geist-latin.woff2") format("woff2");
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
     }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; background: var(--bg); color: var(--fg); }
+    @font-face {
+      font-family: "Geist Mono";
+      src: url("shared/fonts/geist-mono-latin.woff2") format("woff2");
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      color-scheme: light;
+      --ground: #f3efe6;
+      --ground-2: #e7e1d4;
+      --ink: #1c1a17;
+      --muted: #5c5852;
+      --line: #c9bfb0;
+      --accent: #b8431f;
+      --swatch-edge: rgba(28, 26, 23, 0.22);
+      --sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+      --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --ground: #141311;
+        --ground-2: #1e1c18;
+        --ink: #f3efe6;
+        --muted: #a8a298;
+        --line: #3a372f;
+        --accent: #e07a45;
+        --swatch-edge: rgba(243, 239, 230, 0.28);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--ground); color: var(--ink); }
     body {
-      font: 400 15px/1.55 var(--sans);
+      min-height: 100vh;
+      font: 400 16px/1.6 var(--sans);
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
-      min-height: 100vh;
     }
-    .wrap { max-width: 960px; margin: 0 auto; padding: clamp(32px, 8vw, 96px) clamp(20px, 5vw, 48px); }
-    header { margin-bottom: clamp(40px, 8vw, 88px); }
-    .eyebrow {
-      font: 400 11px/1 var(--mono);
-      letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+    p, h1, ol { margin: 0; }
+    [hidden] { display: none !important; }
+    :focus { outline: none; }
+    :focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
+    ::selection { background: #e6d5c8; color: var(--ink); }
+    @media (prefers-color-scheme: dark) {
+      ::selection { background: #3d342c; color: var(--ink); }
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+      opacity: 0.04;
+      mix-blend-mode: multiply;
+    }
+    @media (prefers-color-scheme: dark) {
+      .grain { mix-blend-mode: soft-light; opacity: 0.06; }
+    }
+
+    .sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
     }
     h1 {
-      font: 400 clamp(64px, 14vw, 148px)/.9 var(--serif);
-      letter-spacing: -.02em; margin: 18px 0 20px;
+      font-size: clamp(2.25rem, 4vw, 3.25rem);
+      font-weight: 500;
+      letter-spacing: -0.04em;
+      line-height: 1;
     }
-    h1 em { color: var(--muted); }
-    .lede { max-width: 44ch; color: var(--muted); margin: 0; }
-    ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
-    li { border-bottom: 1px solid var(--line); }
-    li a {
-      display: grid; grid-template-columns: 64px 1fr auto; gap: 8px 24px;
-      align-items: baseline; padding: 22px 0; color: inherit; text-decoration: none;
-      transition: padding .25s ease, color .25s ease;
+    .count {
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
-    li a:hover, li a:focus-visible { padding-left: 12px; outline: none; }
-    li a:hover .title, li a:focus-visible .title { color: var(--accent); }
-    .num { font: 400 12px/1 var(--mono); color: var(--muted); }
-    .title { font: 400 clamp(26px, 4vw, 36px)/1.1 var(--serif); transition: color .25s ease; }
-    .desc { grid-column: 2 / 3; color: var(--muted); font-size: 14px; max-width: 56ch; }
-    .meta { font: 400 11px/1.6 var(--mono); color: var(--muted); text-align: right; white-space: nowrap; }
-    .tags { display: block; opacity: .7; }
-    .state { padding: 22px 0; color: var(--muted); font: 400 12px/1.6 var(--mono); }
+    #header-line {
+      margin-top: 14px;
+      max-width: 40ch;
+      font-size: 16px;
+      line-height: 1.55;
+      text-wrap: pretty;
+    }
+
+    .filter {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      margin-top: 28px;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.4;
+      letter-spacing: 0.01em;
+    }
+    .filter button {
+      font: inherit;
+      color: var(--muted);
+      background: none;
+      border: 0;
+      padding: 8px 0;
+      min-height: 32px;
+      cursor: pointer;
+    }
+    .filter button + button::before {
+      content: "·";
+      margin: 0 0.7em;
+      color: var(--muted);
+    }
+    .filter button[aria-pressed="true"] {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .sheet { margin-top: 18px; }
+
+    .head,
+    .line {
+      display: grid;
+      align-items: center;
+      column-gap: 16px;
+    }
+    .head {
+      display: none;
+      padding: 0 0 8px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .ledger { list-style: none; padding: 0; }
+    .ledger li { border-bottom: 1px solid var(--line); }
+    .ledger li:first-child { border-top: 1px solid var(--line); }
+    .ledger a {
+      position: relative;
+      display: block;
+      padding: 16px 0 18px;
+      color: inherit;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .line {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "num status"
+        "title title"
+        "job job"
+        "swatch date";
+      row-gap: 5px;
+    }
+    .num { grid-area: num; }
+    .status { grid-area: status; justify-self: end; }
+    .title { grid-area: title; }
+    .job { grid-area: job; }
+    .swatch { grid-area: swatch; justify-self: start; }
+    .date { grid-area: date; justify-self: end; }
+    .num, .job, .status, .date, .head {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+    }
+    .num, .job, .status, .date {
+      font-size: 12px;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+    .num { letter-spacing: 0.04em; }
+    .is-newest .num { color: var(--accent); font-weight: 500; }
+    .title {
+      font-size: 1.35rem;
+      font-weight: 560;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: var(--ink);
+    }
+    .job { overflow-wrap: anywhere; }
+    .status, .date, .num { white-space: nowrap; }
+
+    .swatch:not(:empty) {
+      display: flex;
+      width: 68px;
+      height: 14px;
+      box-shadow: inset 0 0 0 1px var(--swatch-edge);
+    }
+    .swatch i { flex: 1 1 0; display: block; }
+
+    .poster {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin-top: 8px;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      background: var(--ground-2);
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+
+    .state {
+      padding: 18px 0;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
     footer {
-      margin-top: 64px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-      font: 400 11px/1.6 var(--mono); color: var(--muted); letter-spacing: .04em;
+      margin-top: 48px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.5;
+      letter-spacing: 0.03em;
+      color: var(--muted);
     }
-    footer a { color: inherit; }
-    @media (max-width: 560px) {
-      li a { grid-template-columns: 40px 1fr; }
-      .meta { grid-column: 2 / 3; text-align: left; }
+    footer a {
+      color: inherit;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.22em;
+      text-decoration-color: var(--line);
     }
-    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    footer a:hover { color: var(--ink); text-decoration-color: currentColor; }
+
+    @media (min-width: 1040px) {
+      .wrap {
+        max-width: 1180px;
+        padding: 80px 312px 96px 56px;
+      }
+      #header-line { margin-top: 16px; }
+      .filter { flex-wrap: nowrap; margin-top: 32px; }
+      .sheet { margin-top: 22px; }
+      .head { display: grid; }
+      .head,
+      .line {
+        grid-template-columns: 3.25rem minmax(0, 1fr) minmax(10rem, 14rem) 72px 4.75rem 6.75rem;
+        grid-template-areas: "num title job swatch status date";
+        column-gap: 18px;
+        row-gap: 0;
+      }
+      .head span:last-child { justify-self: end; }
+      .ledger li:first-child { border-top: 0; }
+      .ledger a { padding: 17px 0; }
+      .status { justify-self: start; }
+      .title {
+        font-size: 1.125rem;
+        font-weight: 560;
+        transition: font-weight 180ms var(--ease);
+      }
+      .ledger a:hover .title,
+      .ledger a:focus-visible .title { font-weight: 760; }
+      .poster {
+        position: absolute;
+        top: 0;
+        left: calc(100% + 32px);
+        width: 248px;
+        height: 156px;
+        margin: 0;
+        aspect-ratio: auto;
+        opacity: 0;
+        transform: translateY(6px);
+        pointer-events: none;
+        transition: opacity 180ms var(--ease), transform 180ms var(--ease);
+      }
+      .is-newest .poster {
+        opacity: 1;
+        transform: none;
+      }
+      .ledger:hover .poster,
+      .ledger:focus-within .poster {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      .ledger a:hover .poster,
+      .ledger a:focus-visible .poster {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* A wide touch screen has no hover. Keep the specimen column. */
+    @media (min-width: 1040px) and (pointer: coarse) {
+      .wrap { max-width: 42rem; padding: 32px 20px 56px; }
+      #header-line { margin-top: 14px; }
+      .filter { flex-wrap: wrap; margin-top: 28px; }
+      .sheet { margin-top: 18px; }
+      .head { display: none; }
+      .line {
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          "num status"
+          "title title"
+          "job job"
+          "swatch date";
+        column-gap: 16px;
+        row-gap: 5px;
+      }
+      .ledger li:first-child { border-top: 1px solid var(--line); }
+      .ledger a { padding: 16px 0 18px; }
+      .status { justify-self: end; }
+      .title { font-size: 1.35rem; font-weight: 560; transition: none; }
+      .poster,
+      .is-newest .poster,
+      .ledger:hover .poster,
+      .ledger a:hover .poster,
+      .ledger a:focus-visible .poster {
+        position: static;
+        top: auto;
+        left: auto;
+        width: 100%;
+        height: auto;
+        margin-top: 8px;
+        aspect-ratio: 16 / 10;
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+      }
+      .poster,
+      .is-newest .poster,
+      .ledger:hover .poster,
+      .ledger a:hover .poster,
+      .ledger a:focus-visible .poster {
+        transform: none;
+      }
+    }
   </style>
 </head>
 <body>
+  <svg class="grain" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="100%" height="100%">
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#grain)" />
+  </svg>
+
   <main class="wrap">
     <header>
-      <div class="eyebrow">Creative coding / weekly</div>
-      <h1>Sketches<em>.</em></h1>
-      <p class="lede">Small experiments in WebGPU, shaders, WebGL, motion and layout. One folder per sketch, shipped every week.</p>
+      <div class="title-row">
+        <h1>Sketches</h1>
+        <p class="count" id="count" aria-live="polite"></p>
+      </div>
+      <!--
+        Header line. Replace the text of #header-line.
+        Andres writes the final sentence. The layout does not depend on the wording.
+      -->
+      <p id="header-line">Weekly studies in WebGPU, shaders, motion, and layout.</p>
     </header>
 
-    <ol id="list" aria-live="polite"><li class="state">Loading…</li></ol>
+    <nav class="filter" id="filter" aria-label="Filter by job" hidden></nav>
+
+    <div class="sheet">
+      <div class="head" id="head" hidden aria-hidden="true">
+        <span>No.</span>
+        <span>Title</span>
+        <span>Job</span>
+        <span>Palette</span>
+        <span>Status</span>
+        <span>Date</span>
+      </div>
+      <ol class="ledger" id="list"></ol>
+      <p class="state" id="note">Loading…</p>
+    </div>
 
     <footer>
-      <span id="count"></span>
       <a href="https://github.com/amedinamv/sketches">github.com/amedinamv/sketches</a>
     </footer>
   </main>
 
+  <noscript><p class="state" style="padding-left:20px">JavaScript is off, so this page cannot read the index.</p></noscript>
+
   <script type="module">
     const list = document.getElementById('list');
+    const note = document.getElementById('note');
     const count = document.getElementById('count');
-    const esc = (s = '') => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const filter = document.getElementById('filter');
+    const head = document.getElementById('head');
+    const HEX = /^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+    const POSTER = /^\/sketches\/[A-Za-z0-9._/-]+$/;
+
+    const say = (text) => {
+      note.hidden = false;
+      note.textContent = text;
+    };
+
+    const noun = (n) => `${n} ${n === 1 ? 'sketch' : 'sketches'}`;
 
     try {
       const res = await fetch('/sketches.json', { cache: 'no-cache' });
       if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
-      const sketches = (await res.json()).slice().sort((a, b) => b.slug.localeCompare(a.slug));
+      const data = await res.json();
+      if (!Array.isArray(data)) throw new Error('expected a list');
 
-      list.innerHTML = sketches.length ? sketches.map(s => {
-        const num = s.slug.split('-')[0];
-        const title = s.title || s.slug.replace(/^\d+-/, '').replace(/-/g, ' ');
-        return `<li><a href="/sketches/${encodeURIComponent(s.slug)}/">
-          <span class="num">${esc(num)}</span>
-          <span class="title">${esc(title)}</span>
-          <span class="meta">${esc(s.date || '')}<span class="tags">${esc((s.tags || []).join(' · '))}</span></span>
-          ${s.description ? `<span class="desc">${esc(s.description)}</span>` : ''}
-        </a></li>`;
-      }).join('') : '<li class="state">No sketches yet.</li>';
+      const sketches = data
+        .filter((item) => item && typeof item.slug === 'string' && item.slug)
+        .slice()
+        .sort((a, b) => b.slug.localeCompare(a.slug));
 
-      count.textContent = `${sketches.length} sketch${sketches.length === 1 ? '' : 'es'}`;
+      const newest = sketches[0] && sketches[0].slug;
+      list.replaceChildren();
+
+      if (!sketches.length) {
+        head.hidden = true;
+        say('No sketches yet.');
+        count.textContent = noun(0);
+      } else {
+        const jobs = [];
+        for (const sketch of sketches) {
+          list.append(row(sketch, sketch.slug === newest));
+          if (sketch.job && !jobs.includes(sketch.job)) jobs.push(sketch.job);
+        }
+        jobs.sort((a, b) => a.localeCompare(b));
+        head.hidden = false;
+        note.hidden = true;
+        if (jobs.length) buildFilter(jobs);
+        count.textContent = noun(sketches.length);
+      }
     } catch (err) {
-      list.innerHTML = `<li class="state">Could not load sketches.json (${esc(err.message)})</li>`;
+      head.hidden = true;
+      filter.hidden = true;
+      list.replaceChildren();
+      say(`Could not load sketches.json (${err.message})`);
+    }
+
+    function row(sketch, isNewest) {
+      const li = document.createElement('li');
+      if (isNewest) li.className = 'is-newest';
+      li.dataset.job = typeof sketch.job === 'string' ? sketch.job : '';
+
+      const a = document.createElement('a');
+      a.href = `/sketches/${encodeURIComponent(sketch.slug)}/`;
+      const line = document.createElement('span');
+      line.className = 'line';
+
+      line.append(cell('span', 'num', numberOf(sketch.slug)));
+      line.append(cell('span', 'title', titleOf(sketch)));
+      line.append(cell('span', 'job', sketch.job || '—'));
+
+      const colors = Array.isArray(sketch.palette) ? sketch.palette.filter((c) => HEX.test(c)) : [];
+      if (colors.length) {
+        const swatch = document.createElement('span');
+        swatch.className = 'swatch';
+        swatch.setAttribute('role', 'img');
+        swatch.setAttribute('aria-label', `Palette ${colors.join(', ')}`);
+        for (const color of colors) {
+          const chip = document.createElement('i');
+          chip.style.background = color;
+          swatch.append(chip);
+        }
+        line.append(swatch);
+      } else {
+        line.append(cell('span', 'swatch', ''));
+      }
+
+      line.append(cell('span', 'status', statusOf(sketch)));
+      const time = cell('time', 'date', sketch.date || '—');
+      if (sketch.date) time.dateTime = sketch.date;
+      line.append(time);
+      a.append(line);
+
+      if (typeof sketch.poster === 'string' && POSTER.test(sketch.poster)) {
+        const img = document.createElement('img');
+        img.className = 'poster';
+        img.alt = '';
+        img.src = sketch.poster;
+        img.decoding = 'async';
+        img.addEventListener('error', () => img.remove());
+        a.append(img);
+      }
+
+      li.append(a);
+      return li;
+    }
+
+    function cell(tag, className, text) {
+      const node = document.createElement(tag);
+      node.className = className;
+      node.textContent = text;
+      return node;
+    }
+
+    function numberOf(slug) {
+      const raw = String(slug).split('-')[0] || '';
+      return /^\d+$/.test(raw) ? raw.padStart(3, '0') : raw;
+    }
+
+    function titleOf(sketch) {
+      if (sketch.title) return sketch.title;
+      return String(sketch.slug).replace(/^\d+-/, '').replace(/-/g, ' ');
+    }
+
+    function statusOf(sketch) {
+      return typeof sketch.status === 'string' && sketch.status.trim() ? sketch.status.trim() : 'sketch';
+    }
+
+    function buildFilter(jobs) {
+      filter.hidden = false;
+      filter.replaceChildren();
+      filter.append(chip('all', true));
+      for (const job of jobs) filter.append(chip(job, false));
+    }
+
+    function chip(job, pressed) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.job = job;
+      button.textContent = job;
+      button.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+      button.addEventListener('click', () => select(job));
+      return button;
+    }
+
+    function select(job) {
+      for (const button of filter.querySelectorAll('button')) {
+        button.setAttribute('aria-pressed', button.dataset.job === job ? 'true' : 'false');
+      }
+      let shown = 0;
+      for (const li of list.children) {
+        const match = job === 'all' || li.dataset.job === job;
+        li.hidden = !match;
+        if (match) shown += 1;
+      }
+      const total = list.children.length;
+      if (!shown) say('Nothing filed under this job.');
+      else note.hidden = true;
+      count.textContent = shown === total ? noun(total) : `${shown} of ${total}`;
     }
   </script>
 </body>

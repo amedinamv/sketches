@@ -2,6 +2,44 @@
 
 A pitch-black scene where the cursor is a headlamp. The word **HI-VIS**, the chevron safety tape, the cone bands, and the warning sign stay dull grey until the lamp sits next to the camera, then they throw the beam back into your eye the way a cyclist's jacket does in headlights.
 
+## Job
+
+Reveal-on-alignment hero.
+
+## User problem
+
+The word, the tape, the cone bands, and the sign stay dull grey until the lamp sits next to the camera. The return should collapse when the lamp slides off that axis, even though the light still hits the letters.
+
+## Interaction idea
+
+Move the pointer, or drag on a touch screen, to steer the camera a little and aim the beam. Click, or tap without dragging, to flash. Headlamp offset is the control that kills the glow.
+
+## Signature behaviour
+
+The return appears only when the lamp and the eye share an axis, and dies when the lamp slides off it.
+
+## States
+
+- Idle: dull materials, lamp lined up with the camera, return visible.
+- Pointer / drag: the beam aims with the hand.
+- Tap: a short flash. It still runs when reduced motion is on.
+- No WebGPU, or only partial: the WebGL2 backend, noted in the HUD.
+- Error: a notice if neither backend can draw.
+- Reduced motion: the camera eases in one step. The flash is not yet suppressed.
+
+## What I'd ship
+
+One alignment control on a flat wordmark. A still frame when reduced motion is on, and no camera flash in that mode.
+
+## Art direction
+
+This is the sketch's own direction, not the gallery's.
+
+- **Type.** The wordmark is Helvetiker Bold, Magenta's 2004 face, bundled as `helvetiker_bold.typeface.json` (the license notice is inside the JSON). The control panel uses Instrument Serif and JetBrains Mono from Google Fonts, with `#c8ff5a` on `#0b0b0c`. That panel is the sketch's chrome. The gallery bar does not restyle it.
+- **Palette.** Night return. Ground `#000000`, vinyl `#3a3a36`, cone `#8d4318`, tape return `#d2ff3a`, lamp `#fff4e2`.
+- **Texture.** Bloom on the return, from `BloomNode`.
+- **Signature motion.** The return itself, as the lamp lines up. The flash spikes for 80ms and fades.
+
 ## Technique
 
 three.js r186 adds physically based retroreflection to `MeshPhysicalNodeMaterial` through the `retroreflectivity` parameter (0–1). The pull request called the parameter `retroreflective`; it was renamed before the release. The model is the [Minimal Retroreflective Microfacet Model](https://jcgt.org/published/0015/01/04/): the specular lobe is evaluated with the view direction reflected about the normal, which folds the highlight back toward the light. It only really fires when the light direction and the view direction line up, so the headlamp is kept on the camera and the **headlamp offset** slider slides it sideways. The pool of light can still hit the letters. The return should collapse. That is the whole lesson.

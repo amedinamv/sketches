@@ -1,0 +1,136 @@
+/* Sketch frame. Tokens live here, on :host, so a sketch's variables never leak in. */
+
+:host {
+  all: initial;
+  position: fixed;
+  z-index: 40;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  --ground: #f3efe6;
+  --ink: #1c1a17;
+  --muted: #5c5852;
+  --line: #c9bfb0;
+  --sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --ground: #141311;
+    --ink: #f3efe6;
+    --muted: #a8a298;
+    --line: #3a372f;
+    color-scheme: dark;
+  }
+}
+
+[hidden] { display: none !important; }
+
+.bar,
+.drawer {
+  pointer-events: auto;
+  box-sizing: border-box;
+  background: var(--ground);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  height: calc(36px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-right: max(14px, env(safe-area-inset-right, 0px));
+  padding-left: max(14px, env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.num,
+.sep,
+.notes,
+.back { flex: none; }
+
+.job {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+}
+
+.sep { color: var(--muted); }
+
+.notes,
+.back {
+  font: inherit;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  padding: 8px 0;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.notes { color: var(--muted); }
+.notes[aria-expanded="true"] { color: var(--ink); }
+
+.bar :focus { outline: none; }
+.bar :focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.drawer {
+  position: fixed;
+  top: calc(36px + env(safe-area-inset-top, 0px));
+  left: 0;
+  right: 0;
+  max-height: min(70vh, 32rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 16px max(16px, env(safe-area-inset-right, 0px)) 20px max(16px, env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid var(--line);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-overflow-scrolling: touch;
+}
+
+.drawer h2 {
+  margin: 16px 0 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.drawer h2:first-child { margin-top: 0; }
+
+.drawer p {
+  margin: 0;
+  max-width: 62ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar, .drawer { scroll-behavior: auto; }
+}

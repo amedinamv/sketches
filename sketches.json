@@ -4,13 +4,29 @@
     "title": "Hi-Vis After Dark",
     "date": "2026-09-30",
     "tags": ["webgpu", "three.js", "retroreflection"],
-    "description": "A headlamp in the dark. Retroreflective lettering stays dull grey until the beam lines up with your eye."
+    "description": "A headlamp in the dark. Retroreflective lettering stays dull grey until the beam lines up with your eye.",
+    "job": "reveal-on-alignment hero",
+    "problem": "The word, the tape, the cone bands, and the sign stay dull grey until the lamp sits next to the camera. The return should collapse when the lamp slides off that axis, even though the light still hits the letters.",
+    "interaction": "Move the pointer, or drag on a touch screen, to steer the camera a little and aim the beam. Click, or tap without dragging, to flash. Headlamp offset is the control that kills the glow.",
+    "technique": "three.js r186 MeshPhysicalNodeMaterial retroreflectivity. The specular lobe is evaluated with the view direction reflected about the normal, so it only fires when the lamp and the eye line up. WebGPU, with a WebGL2 fallback when WebGPU is missing or only partial.",
+    "ship": "One alignment control on a flat wordmark. A still frame when reduced motion is on, and no camera flash in that mode.",
+    "palette": ["#000000", "#3a3a36", "#8d4318", "#d2ff3a", "#fff4e2"],
+    "status": "sketch",
+    "poster": "/sketches/001-hi-vis-after-dark/poster.png"
   },
   {
     "slug": "000-hello-webgpu",
     "title": "Hello WebGPU",
     "date": "2026-09-30",
     "tags": ["webgpu", "wgsl", "shader"],
-    "description": "A full-screen animated fragment shader running on WebGPU, with a WebGL2 fallback."
+    "description": "A full-screen animated fragment shader running on WebGPU, with a WebGL2 fallback.",
+    "job": "hero background",
+    "problem": "A full-bleed hero background has to keep running on machines that do not have WebGPU.",
+    "interaction": "Nothing to steer. The shader plays on its own. If WebGPU is missing or fails to start, the same picture comes up through WebGL2.",
+    "technique": "One full-screen triangle. A WGSL fragment shader on WebGPU, and the same loop in GLSL ES 3.0 on WebGL2. Pixel ratio capped at 2.",
+    "ship": "Use it behind real content. Pause the loop when reduced motion is requested, and treat the WebGL2 path as the one phones will actually hit.",
+    "palette": ["#000000", "#a7e758", "#ca8002", "#063546", "#ffe7e7"],
+    "status": "sketch",
+    "poster": "/sketches/000-hello-webgpu/poster.png"
   }
 ]
