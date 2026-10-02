@@ -1,5 +1,18 @@
 [
   {
+    "slug": "002-magnetic-weight-nav",
+    "title": "Magnetic Weight Nav",
+    "date": "2026-10-02",
+    "tags": ["type", "nav", "variable-font"],
+    "description": "A vertical menu whose words get heavier and wider as the pointer or finger draws near.",
+    "job": "Menu or nav reveal",
+    "problem": "A static menu gives no hint which item you are about to choose.",
+    "interaction": "Each word's weight and width track pointer or finger distance. The nearest word turns signal blue.",
+    "palette": ["#E9E2D6", "#1B1A17", "#8C857A", "#2F4BFF"],
+    "status": "sketch",
+    "poster": "/sketches/002-magnetic-weight-nav/poster.png"
+  },
+  {
     "slug": "001-hi-vis-after-dark",
     "title": "Hi-Vis After Dark",
     "date": "2026-09-30",
