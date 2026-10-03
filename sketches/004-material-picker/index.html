@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-frame="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -34,9 +34,6 @@
 
     .hud { position: fixed; z-index: 2; pointer-events: none; }
     .hud a, .hud button { pointer-events: auto; }
-    .tr { top: calc(36px + 14px + var(--st)); right: 20px; text-align: right; } /* below the shared sketch bar */
-    .eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: 10px; color: var(--muted); }
-    .eyebrow b { font-weight: 500; color: var(--fg); }
 
     .dock {
       left: 50%; bottom: calc(22px + var(--sb)); transform: translateX(-50%);
@@ -69,7 +66,6 @@
       .opt { padding: 5px 11px 5px 5px; font-size: 15px; gap: 7px; }
       .opt i { width: 24px; height: 24px; }
       .spec { gap: 12px; font-size: 9px; }
-      .tr { display: none; }
     }
     .loading { position: fixed; inset: 0; display: grid; place-items: center; z-index: 3; pointer-events: none;
       font: 400 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); transition: opacity .6s; }
@@ -78,7 +74,6 @@
 </head>
 <body>
   <canvas id="gl"></canvas>
-  <div class="hud tr eyebrow">Drag to turn</div>
   <div class="hud dock">
     <div class="spec" id="spec"></div>
     <div class="picker" role="group" aria-label="Material">
@@ -379,6 +374,9 @@
     document.documentElement.classList.add('ready');
     window.__mp = { setLook, obj, pivot, renderer, MATS, LOOKS, scene };
   </script>
+  <div id="frame-controls" data-frame-controls hidden>
+    <p data-frame-hint>Drag to turn.</p>
+  </div>
   <script src="/shared/frame.js"></script>
 </body>
 </html>

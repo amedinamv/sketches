@@ -38,19 +38,19 @@ Drop the spec column; it is the sketch’s teaching layer. Keep the knobs. Point
 ### Fonts
 
 - **Bricolage Grotesque**, Mathieu Triay, SIL Open Font License. [Google Fonts](https://fonts.google.com/specimen/Bricolage+Grotesque). The latin variable file served for `opsz,wdth,wght@12..96,75..100,200..800` has three axes: `opsz` 12–96 (default 96), `wght` 200–800 (default 800), `wdth` 75–100 (default 100). Width is available, so the sketch uses it. Words set `font-weight`, `font-stretch`, and `font-variation-settings` (`opsz` pinned at 96 for display sizes).
-- **IBM Plex Mono**, IBM, SIL Open Font License. [Google Fonts](https://fonts.google.com/specimen/IBM+Plex+Mono). Spec column and the running header.
+- **IBM Plex Mono**, IBM, SIL Open Font License. [Google Fonts](https://fonts.google.com/specimen/IBM+Plex+Mono). Spec column. The top bar is the shared frame, light variant, in Geist Mono.
 
 ### Palette
 
 | Role | Hex | On clay `#E9E2D6` |
 | --- | --- | --- |
 | Clay, background | `#E9E2D6` | — |
-| Ink, words at rest and header link | `#1B1A17` | 13.5:1 |
+| Ink, words at rest | `#1B1A17` | 13.5:1 |
 | Signal, the single closest word | `#2F4BFF` | 4.6:1 |
-| Muted, header rule only | `#8C857A` | 2.8:1 |
+| Muted, gallery swatch | `#8C857A` | 2.8:1 |
 | Spec, mono labels | `#5D5850` | 5.5:1 |
 
-`#8C857A` is the specified mute. On this clay it measures 2.84:1, short of WCAG AA for text (4.5:1) and for large text (3:1), so it is used only on the hairline under the header. The spec labels use `#5D5850`, the same warm grey darkened until the contrast is 5.5:1.
+`#8C857A` is the specified mute. On this clay it measures 2.84:1, short of WCAG AA for text (4.5:1) and for large text (3:1), so the page does not set type in it. The spec labels use `#5D5850`, the same warm grey darkened until the contrast is 5.5:1. The top rule belongs to the shared frame.
 
 ### Texture
 

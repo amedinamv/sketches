@@ -2,7 +2,7 @@
 
 Weekly creative-coding sketches: WebGPU, shaders, WebGL, motion and layout.
 
-The frame, the per-sketch contract, and the checklist live in [CRAFT.md](CRAFT.md). Sketches do not share a house style. The index and the thin bar at the top of a sketch are the only consistent pieces.
+The frame, the per-sketch contract, and the checklist live in [CRAFT.md](CRAFT.md). Sketches do not share a house style. The index and the frame around a sketch — the bar, the notes, and the optional controls band — are the only consistent pieces.
 
 Live: https://sketches-ochre.vercel.app
 
@@ -17,7 +17,7 @@ Every push to `main` deploys to Vercel automatically. The site is plain static f
 ├── sketches.json         # manifest of published sketches
 ├── vercel.json           # cleanUrls + trailingSlash
 ├── shared/
-│   ├── frame.js          # top bar + notes drawer (shadow root)
+│   ├── frame.js          # top bar, notes drawer, optional controls band
 │   ├── frame.css
 │   └── fonts/            # Geist and Geist Mono, latin, OFL
 └── sketches/
@@ -33,7 +33,8 @@ Every push to `main` deploys to Vercel automatically. The site is plain static f
   - `slug` is short and kebab-case.
 - Each sketch has its own `index.html` as the entry point. Prefer a single self-contained file with no dependencies.
   - If a sketch outgrows one file, it can be its own Vite (or similar) project inside its folder. Commit the built output (e.g. build with `base: './'` into the sketch folder), or add a build step to Vercel at that point.
-- Include the frame once, at the end of `<body>`: `<script src="/shared/frame.js"></script>`. It adds the top bar and does not set the sketch's fonts or colors.
+- Include the frame once, at the end of `<body>`: `<script src="/shared/frame.js"></script>`. On `<html>`, set `data-frame="light"` or `data-frame="dark"` so the bar matches the sketch. The frame does not set the sketch's fonts or colors.
+- If the sketch needs knobs or an interaction hint, add them in `[data-frame-controls]`. The markup is in [CRAFT.md](CRAFT.md). A control that is the experience itself stays in the sketch.
 - Add `poster.png` in the sketch folder (a still) and point `poster` at it.
 - The sentence at the top of the gallery is `#header-line` in `index.html`. Replace that text; the layout does not depend on it.
 
@@ -61,7 +62,7 @@ Every push to `main` deploys to Vercel automatically. The site is plain static f
    ```
 
    Only `slug` is required. Older entries, with just `slug`, `title`, `date`, `tags`, and `description`, still list. The gallery sorts entries newest-first by slug. `status` is `sketch` or `kit`. `technique` and `ship` are optional notes for the bar.
-3. Before `</body>`, add `<script src="/shared/frame.js"></script>`.
+3. Set `data-frame="light"` or `data-frame="dark"` on `<html>`. Before `</body>`, add `<script src="/shared/frame.js"></script>`. Pad the top of a scrolling sketch with `var(--frame-offset)` so the bar does not cover the first line. Full-bleed canvases can sit under the bar.
 4. Save a still as `poster.png` in the sketch folder.
 5. Commit and push to `main`, and Vercel deploys it. It will be at `/sketches/NNN-slug/`.
 

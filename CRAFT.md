@@ -8,13 +8,56 @@ Each sketch has its own type, palette, texture, and mood. A shader study and a l
 
 The index (`index.html`, `sketches.json`) is a ledger. A number, a title, the UI job, a palette swatch, a status (`sketch` or `kit`), and a date. Hairlines, weight, and space do the hierarchy. The accent marks only the newest sketch.
 
-`shared/frame.js` is the only include. It paints `NNN · job · ← index` and, when the manifest has notes, a drawer. The bar is in a shadow root. It does not set fonts or colors on the sketch.
+`shared/frame.js` is the only include. Every sketch gets the same bar: `NNN · title · job · Notes · ← index`, and, when the manifest has notes, a drawer. The bar is in a shadow root. It uses Geist and Geist Mono, the same faces as the index. It does not set fonts or colors on the sketch.
+
+The frame has two variants, the same pair as the gallery. Light is warm paper (`#f3efe6`, ink `#1c1a17`). Dark is warm near-black (`#141311`, ink `#f3efe6`). A sketch picks one with `data-frame` on `<html>`, so the chrome matches the sketch instead of the operating system.
 
 ```html
-<script src="/shared/frame.js"></script>
+<html lang="en" data-frame="dark">
+  ...
+  <script src="/shared/frame.js"></script>
+</html>
 ```
 
-The drawer reads four optional fields: `problem`, `interaction` (shown as Idea), `technique`, and `ship` (shown as What I'd ship). Missing fields are skipped.
+`data-frame` is `light` or `dark`. If it is missing, the frame is light.
+
+| Sketch | Variant | Why |
+| --- | --- | --- |
+| 000 Hello WebGPU | dark | The picture is a black field. |
+| 001 Hi-Vis After Dark | dark | The scene is pitch black. |
+| 002 Magnetic Weight Nav | light | Clay paper. |
+| 003 Flute Clear | light | Bone ground. |
+| 004 Material Picker | light | Every finish is a light ground. |
+
+On a narrow screen the job drops out of the bar so the title, Notes, and the way back still fit. `?poster=1` skips the bar and leaves any controls hidden. That is how `poster.png` is shot.
+
+A sketch that flows down the page, rather than painting a full-bleed canvas, clears the bar with `var(--frame-offset)` on its top padding. The frame sets that length to the bar, plus the controls band when it is open. Safe areas are included.
+
+The drawer reads four optional fields: `problem`, `interaction` (shown as Idea), `technique`, and `ship` (shown as What I'd ship). Missing fields are skipped. Escape closes it. Focus is a 1px ink outline.
+
+### Controls
+
+Knobs, toggles, and interaction hints sit in one band under the bar. Same type, same ground, same hairline, on desktop and on a phone. Omit the element when the sketch has nothing to add.
+
+```html
+<div id="frame-controls" data-frame-controls hidden>
+  <p data-frame-hint>
+    <span data-when="fine">Hover a card</span>
+    <span data-when="coarse">Scroll or tap a card</span>
+    to clear the pane.
+  </p>
+  <div class="fields">
+    <label>
+      <span>bloom <output id="bloom-out">0.08</output></span>
+      <input id="bloom" type="range" min="0" max="1.5" step="0.01" value="0.08" />
+    </label>
+  </div>
+</div>
+```
+
+`hidden` stays until the frame takes the element. `data-when="fine"` is the mouse line. `data-when="coarse"` is the touch line. A hint with no `.fields` stays on screen. Fields collapse behind a Controls button below 720px, so a 375px portrait keeps the picture; the hint stays. Opening the band is instant. It does not animate, including when `prefers-reduced-motion` is on.
+
+A control that is the thing being studied stays in the sketch. The material dock in 004 is that case: the job is the picker, so the picker keeps its own type and shape. "Drag to turn" is only a hint, so it lives in the band. 001's sliders and aim hint live in the band. 003's hover line does too. The page title under it ("Fresh cans, behind glass") is the sketch, and stays.
 
 ## Per-sketch UX contract
 
