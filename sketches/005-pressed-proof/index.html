@@ -15,6 +15,7 @@
   <script>
     if (new URLSearchParams(location.search).has('poster')) {
       document.documentElement.style.setProperty('--frame-offset', '0px');
+      document.documentElement.dataset.poster = '1';
     }
   </script>
   <style>
@@ -208,6 +209,15 @@
     @media (prefers-reduced-motion: reduce) {
       .submit:active { transform: none; }
     }
+
+    html[data-poster] body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 32px 24px;
+    }
+    html[data-poster] .sheet { padding-block: 8px; }
   </style>
 </head>
 <body>
