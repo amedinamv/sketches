@@ -1,0 +1,247 @@
+/* Pressed field. Theme it with the --pp-* variables. Defaults are the proof room.
+   Validity is weight, ink, the rule, and a deboss you can see. Accent is only the focus ring.
+   The rules are in RESEARCH.md. */
+
+:where(pressed-field) {
+  --pp-live-wght: var(--pp-weight-faint, 360);
+  --pp-live-soft: calc(var(--pp-softness, 0.6) * 100);
+  --pp-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding-inline: 5px;
+  color: var(--pp-ink, #1c1a17);
+  font-family: var(--pp-meta-font, "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace);
+  font-size: 13px;
+  line-height: 1.45;
+  scroll-margin-top: 72px;
+  transition:
+    --pp-live-wght var(--pp-duration, 200ms) var(--pp-ease),
+    --pp-live-soft var(--pp-duration, 200ms) var(--pp-ease);
+}
+
+:where(pressed-field[data-state="inked"]) {
+  --pp-live-wght: var(--pp-weight-inked, 780);
+  --pp-live-soft: 0;
+}
+
+:where(pressed-field) .pp-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: text;
+}
+
+:where(pressed-field) .pp-label-text {
+  font: 500 12px/1.3 var(--pp-meta-font, "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace);
+  font-variation-settings: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pp-ink, #1c1a17);
+}
+
+:where(pressed-field) .pp-field {
+  display: block;
+  min-width: 0;
+  border-radius: 2px;
+}
+
+:where(pressed-field) input,
+:where(pressed-field) .pp-control {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  margin: 0;
+  padding: 6px 0 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--pp-ink, #1c1a17);
+  caret-color: var(--pp-ink, #1c1a17);
+  font-family: var(--pp-font, "Fraunces", "Iowan Old Style", Palatino, "Palatino Linotype", serif);
+  font-size: 22px;
+  font-weight: var(--pp-live-wght, var(--pp-weight-faint, 360));
+  font-synthesis: weight;
+  font-optical-sizing: none;
+  font-variation-settings:
+    "wght" var(--pp-live-wght, var(--pp-weight-faint, 360)),
+    "SOFT" var(--pp-live-soft, 60),
+    "opsz" var(--pp-opsz, 24);
+  font-feature-settings: "kern" 1, "liga" 1;
+  letter-spacing: 0.012em;
+  line-height: 1.25;
+  text-shadow: none;
+  transform: translateY(0);
+  transition:
+    color var(--pp-duration, 200ms) var(--pp-ease),
+    text-shadow var(--pp-duration, 200ms) var(--pp-ease),
+    letter-spacing var(--pp-duration, 200ms) var(--pp-ease),
+    transform var(--pp-duration, 200ms) var(--pp-ease);
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+}
+
+:where(pressed-field[data-state="soft"]) .pp-control,
+:where(pressed-field[data-state="error"]) .pp-control {
+  color: color-mix(in srgb, var(--pp-ink, #1c1a17) 64%, var(--pp-paper, #f3efe6));
+}
+
+:where(pressed-field[data-state="inked"]) .pp-control {
+  color: var(--pp-ink, #1c1a17);
+  letter-spacing: -0.03em;
+  transform: translateY(0.6px);
+  text-shadow:
+    0 calc(var(--pp-deboss-depth, 1.65) * -0.72px) 0 color-mix(in srgb, var(--pp-paper, #f3efe6) 35%, black),
+    0 calc(var(--pp-deboss-depth, 1.65) * 1.05px) 0 color-mix(in srgb, var(--pp-paper, #f3efe6) 18%, white);
+}
+
+:where(pressed-field) .pp-control::placeholder {
+  color: color-mix(in srgb, var(--pp-ink, #1c1a17) 64%, var(--pp-paper, #f3efe6));
+  opacity: 1;
+  font-weight: var(--pp-weight-faint, 360);
+  letter-spacing: 0.012em;
+  text-shadow: none;
+}
+
+:where(pressed-field) .pp-control:focus {
+  outline: none;
+}
+
+/* The browser's invalid chrome is a red ring. Validity here is the type, not that ring. */
+:where(pressed-field) .pp-control:invalid,
+:where(pressed-field) .pp-control:user-invalid {
+  box-shadow: none;
+  outline: none;
+}
+
+:where(pressed-field:has(.pp-control:focus-visible)) .pp-field {
+  box-shadow:
+    0 0 0 2px var(--pp-paper, #f3efe6),
+    0 0 0 4px var(--pp-accent, #7a3328);
+}
+
+:where(pressed-field) .pp-control::selection {
+  background: color-mix(in srgb, var(--pp-ink, #1c1a17) 16%, var(--pp-paper, #f3efe6));
+  color: var(--pp-ink, #1c1a17);
+}
+
+:where(pressed-field) .pp-control:-webkit-autofill,
+:where(pressed-field) .pp-control:-webkit-autofill:hover,
+:where(pressed-field) .pp-control:-webkit-autofill:focus {
+  -webkit-text-fill-color: currentColor;
+  caret-color: var(--pp-ink, #1c1a17);
+  box-shadow: inset 0 0 0 1000px var(--pp-paper, #f3efe6);
+  transition: background-color 9999s ease-out;
+}
+
+/* The slot is always 3px. Thickness changes inside it, so the field does not jump. */
+:where(pressed-field) .pp-rule {
+  display: block;
+  height: 3px;
+  margin-top: 1px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 100% 1px;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--pp-ink, #1c1a17) 42%, transparent),
+    color-mix(in srgb, var(--pp-ink, #1c1a17) 42%, transparent)
+  );
+  transition: background-size var(--pp-duration, 200ms) var(--pp-ease);
+}
+
+:where(pressed-field[data-state="inked"]) .pp-rule {
+  background-size: 100% 2.5px;
+  background-image: linear-gradient(var(--pp-ink, #1c1a17), var(--pp-ink, #1c1a17));
+}
+
+:where(pressed-field[data-state="error"]) .pp-rule {
+  background-size: 100% 2px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--pp-ink, #1c1a17) 0 5px,
+    transparent 5px 9px
+  );
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :where(pressed-field:hover:not([disabled]):not([data-state="inked"]):not([data-state="error"])) .pp-rule {
+    background-size: 100% 1.5px;
+    background-image: linear-gradient(
+      color-mix(in srgb, var(--pp-ink, #1c1a17) 78%, transparent),
+      color-mix(in srgb, var(--pp-ink, #1c1a17) 78%, transparent)
+    );
+  }
+}
+
+:where(pressed-field) .pp-message {
+  min-height: 1.45em;
+  margin: 8px 0 0;
+  font: 400 13px/1.45 var(--pp-meta-font, "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace);
+  font-variation-settings: normal;
+  letter-spacing: 0;
+  text-transform: none;
+  color: color-mix(in srgb, var(--pp-ink, #1c1a17) 72%, var(--pp-paper, #f3efe6));
+  overflow-wrap: anywhere;
+}
+
+:where(pressed-field) .pp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:where(pressed-field.is-wobbling) .pp-field {
+  animation: pp-wobble var(--pp-duration, 200ms) var(--pp-ease);
+}
+
+:where(pressed-field[disabled]) .pp-label,
+:where(pressed-field[disabled]) .pp-control {
+  cursor: not-allowed;
+}
+
+:where(pressed-field[disabled]) .pp-label-text {
+  color: var(--pp-ink, #1c1a17);
+}
+
+:where(pressed-field[disabled]) .pp-control {
+  color: color-mix(in srgb, var(--pp-ink, #1c1a17) 72%, var(--pp-paper, #f3efe6));
+  letter-spacing: 0.012em;
+  text-shadow: none;
+  transform: none;
+}
+
+:where(pressed-field[disabled]) .pp-rule {
+  background-size: 100% 1px;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--pp-ink, #1c1a17) 28%, transparent),
+    color-mix(in srgb, var(--pp-ink, #1c1a17) 28%, transparent)
+  );
+}
+
+@keyframes pp-wobble {
+  0%, 100% { transform: translateX(0); }
+  32% { transform: translateX(calc(var(--pp-wobble, 2.5) * -1px)); }
+  58% { transform: translateX(calc(var(--pp-wobble, 2.5) * 0.62px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(pressed-field),
+  :where(pressed-field) .pp-control,
+  :where(pressed-field) .pp-rule,
+  :where(pressed-field) .pp-message {
+    transition: none;
+  }
+
+  :where(pressed-field.is-wobbling) .pp-field {
+    animation: none;
+  }
+}

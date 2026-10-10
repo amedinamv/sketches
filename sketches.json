@@ -1,5 +1,20 @@
 [
   {
+    "slug": "005-pressed-proof",
+    "title": "Pressed Proof",
+    "date": "2026-10-10",
+    "tags": ["form", "type", "variable-font"],
+    "description": "A case study. Red errors scold and flash. These fields show validity in the weight, the ink, the rule, and a deboss you can see.",
+    "job": "Form field",
+    "problem": "Red error states scold and flash, and color-only feedback fails for anyone who cannot see that red.",
+    "interaction": "A typical red form sits beside the pressed field. Unfinished type stays light, on a thin rule. A valid value jumps in weight, ink, rule, and a visible deboss. An error is a dashed rule, a sentence that says how to fix it, and one small wobble.",
+    "technique": "A custom element, pressed-field, with the input in light DOM so a native form still submits and validates. Fraunces SOFT and wght carry the impression. Fonts without those axes fall back to weight, ink density, and the rule. Events pp:valid and pp:invalid.",
+    "ship": "The element in a lead form: email, name, WhatsApp, submit. Drop the before column, the preset switcher, and the knobs. Keep the weight, the rule, the deboss, the sentence, one wobble, and an instant cut when reduced motion is on.",
+    "palette": ["#f3efe6", "#1c1a17", "#5c5852", "#7a3328"],
+    "status": "preview",
+    "poster": "/sketches/005-pressed-proof/poster.png"
+  },
+  {
     "slug": "004-material-picker",
     "title": "Material Picker",
     "date": "2026-10-02",

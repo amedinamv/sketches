@@ -28,6 +28,7 @@ The frame has two variants, the same pair as the gallery. Light is warm paper (`
 | 002 Magnetic Weight Nav | light | Clay paper. |
 | 003 Flute Clear | light | Bone ground. |
 | 004 Material Picker | light | Every finish is a light ground. |
+| 005 Pressed Proof | light | Warm paper. The night theme is a pull on that bench, not the frame. |
 
 On a narrow screen the job drops out of the bar so the title, Notes, and the way back still fit. `?poster=1` skips the bar and leaves any controls hidden. That is how `poster.png` is shot.
 
