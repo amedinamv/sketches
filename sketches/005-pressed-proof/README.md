@@ -1,6 +1,8 @@
 # 005 · Pressed Proof
 
-A lead form whose type carries the validation. Unfinished text stays light and soft, like a proof that did not take the ink. A valid value settles into a heavier, sharper cut with a shallow deboss. An error wobbles once, and the reason is written under the line.
+A case study of a lead form whose type carries the validation. Unfinished text stays light, like a proof that did not take the ink. A valid value settles into a much heavier cut, a thicker rule, and a deboss you can see. An error keeps the light type, turns the rule dashed, wobbles once, and writes the fix under the line.
+
+The page puts a typical red-error form beside it, so the difference is the argument. The reference pass is [`RESEARCH.md`](RESEARCH.md).
 
 The thing to keep is not this page. It is [`pressed-field.js`](pressed-field.js) and [`pressed-field.css`](pressed-field.css): one custom element, no build, safe to drop into plain HTML or Astro.
 
@@ -10,33 +12,35 @@ Form field. A lead form: email, name, and a WhatsApp number.
 
 ## User problem
 
-People can miss a red outline, and some of them cannot see it at all. A field should say, in the type itself, whether the line is finished.
+Red error states scold and flash. Color-only feedback fails for anyone who cannot see that red. A field should say, in the type itself, whether the line is finished, and in one sentence how to fix it.
 
 ## Interaction idea
 
-The value is printed as it is checked. Incomplete type is under-inked. A valid value is inked. The words under the field say what is wrong, so the state never depends on color alone.
+The value is printed as it is checked. Incomplete type is under-inked. A valid value is inked. The words under the field say what is wrong and how to fix it, so the state never depends on color alone. The page shows the red pattern next to this one.
 
 ## Signature behaviour
 
-While a value is unfinished it sits at a lighter weight, a softer draw (the Fraunces `SOFT` axis, when the font has it), and a slightly thinner ink. When the check passes, the same letters settle to a heavier weight, a sharp cut, and a one-pixel deboss. The change takes the `--pp-duration` (280ms in the proof room), on `cubic-bezier(.2, .8, .2, 1)`.
+While a value is unfinished it sits at weight 360, a softer draw (the Fraunces `SOFT` axis, when the font has it), ink mixed to 64% so it stays above 4.5:1, and a 1px rule. When the check passes, the same letters go to weight 780, solid ink, a 2.5px rule, a deboss of about a pixel and a half, and a settle of under a pixel. The change takes `--pp-duration` (200ms in the proof room), on `cubic-bezier(0.23, 1, 0.32, 1)`. With motion paused, the two states still read.
 
 ## States
 
-- **Idle.** Empty. Placeholder only. Helper text under a hairline. `data-state="idle"`.
-- **Soft.** Something is typed and it does not pass yet. Lighter ink, softer letters. If `when` is `blur`, the helper stays and `aria-invalid` stays false until the field is left or the form is submitted.
-- **Inked.** The value passes. Heavier type, sharp cut, shallow deboss, solid rule. `data-state="inked"`.
-- **Error.** The field has been committed (blur, input, or submit, depending on `when`) and still fails. The soft type remains, the rule turns dashed, the helper is replaced by the error sentence, and the field wobbles once. `aria-invalid="true"`. `data-state="error"`.
-- **Focus.** A 1px outline in `--pp-accent`. The rule goes solid. Mouse click does not draw the outline; the keyboard does.
-- **Disabled.** The `disabled` attribute. The field does not submit a new edit.
-- **Touch.** The input is at least 48px tall and 20px type, so a phone does not zoom the page on focus.
-- **Reduced motion.** No transition and no wobble. Weight, ink, the dashed rule, and the message still change, instantly.
+- **Idle.** Empty. The label stays. The placeholder is an example, not the name of the field. Helper text under a hairline. `data-state="idle"`.
+- **Soft.** Something is typed and it does not pass yet. Lighter ink, softer letters, thin rule. If `when` is `blur`, the helper stays and `aria-invalid` stays false until the field is left or the form is submitted.
+- **Inked.** The value passes. Heavy type, solid ink, thick rule, visible deboss. `data-state="inked"`.
+- **Error.** The field has been committed (blur, input, or submit, depending on `when`) and still fails. The light type remains, the rule turns dashed, the helper is replaced by the error sentence, and the field wobbles once. A visually hidden “Error: ” prefixes the sentence. `aria-invalid="true"`. `data-state="error"`.
+- **Focus.** A double ring: 2px of `--pp-paper`, then 2px of `--pp-accent`. Mouse click does not draw it; the keyboard does. The validity rule stays visible while focused.
+- **Hover.** Only under `(hover: hover)` and `(pointer: fine)`. It darkens the hairline. It does not recolor validity.
+- **Disabled.** The `disabled` attribute. The label stays full ink. The value stays readable. The field does not take a new edit.
+- **Loading.** The `loading` attribute. The message reads “Checking…”. The input is read-only and stays focusable. `aria-busy="true"`. Nothing spins.
+- **Touch.** The input is at least 48px tall and 22px type, so a phone does not zoom the page on focus.
+- **Reduced motion.** No transition and no wobble. Weight, ink, the rule, and the message still change, instantly.
 - **No JavaScript.** An `input` nested in the element stays a normal field and submits with the form. It just does not take the ink.
 
 There is no WebGPU here, and nothing to fall back from.
 
 ## What I'd ship
 
-The element, in a real lead form, with the three fields and the submit. Drop the preset switcher and the knobs. Keep the helper, the weight, one wobble, and the instant cut when reduced motion is on.
+The element, in a real lead form, with the three fields and the submit. Drop the before column, the preset switcher, and the knobs. Keep the weight, the rule, the deboss, the sentence, one wobble, and the instant cut when reduced motion is on.
 
 ## Art direction
 
@@ -57,7 +61,7 @@ Proof room. The page is this palette. The other two presets are themes of the co
 | Muted, helpers at 72% ink | mixed | about 6:1 |
 | Accent, the submit and the focus ring | `#7a3328` | white-warm `#f7f3ec` on it is 9:1 |
 
-The soft state mixes ink toward paper by at most 32% at softness 1, which stays above 4.5:1. Weight and the `SOFT` axis do the rest, so the state still reads in grayscale.
+The soft state mixes the ink to 64% against the paper. On the proof-room ground that is about 4.9:1, on Captapage about 5.1:1, at night about 7:1. Weight, the rule, and the deboss do the rest, so the state still reads in grayscale. Softness moves the `SOFT` axis only. It does not thin the ink further, so a knob cannot push the type under 4.5:1.
 
 ### Texture
 
@@ -65,7 +69,7 @@ None. A grain would sit on top of the deboss and make the cut look dirty.
 
 ### Motion
 
-One move: the settle from soft type to inked type, 280ms, `cubic-bezier(.2, .8, .2, 1)`. The error wobble is a single correction of about a pixel, over the same duration, not a loop and not a flash. Reduced motion cuts both.
+One move: the settle from soft type to inked type, 200ms, `cubic-bezier(0.23, 1, 0.32, 1)`. That is Emil Kowalski’s ease-out, chosen so the change arrives and then sits. CRAFT.md’s house curve is the quieter cousin `cubic-bezier(.2, .8, .2, 1)`. The error wobble is a single correction of about 2.5px, over the same duration, not a loop and not a flash. The button press is 120ms. Reduced motion cuts the tweens and the wobble. Layout does not animate: the rule’s thickness changes inside a reserved 3px slot.
 
 ### Captapage preset
 
@@ -175,7 +179,8 @@ field.addEventListener('pp:valid', (event) => {
 | `spellcheck` | `true`, `false` | Default off for email and phone. |
 | `form` | form id | Passed through, for a field outside the form. |
 | `value` | text | Starting value. After that, set the `.value` property. |
-| `disabled` | boolean | Disables the input. |
+| `disabled` | boolean | Disables the input. The label stays readable. |
+| `loading` | boolean | Shows “Checking…”, sets `aria-busy`, and makes the input read-only. It stays focusable. |
 
 Phone and WhatsApp accept a leading `+` or `00`, then 8 to 15 digits. Spaces, hyphens, dots, and parentheses are fine. A national number with no country code stays soft.
 
@@ -204,7 +209,7 @@ Both bubble and are composed. They fire when the value crosses between valid and
 
 `event.detail` is `{ name, value, valid, state, message }`. `message` is set when the error is on screen.
 
-The element keeps native submit working. The input lives in light DOM, so `FormData` and constraint validation see it. `setCustomValidity` carries the same sentence as the helper line. An invalid form does not fire `submit`.
+The element keeps native submit working. The input lives in light DOM, so `FormData` and constraint validation see it. `setCustomValidity` carries the same sentence as the line under the field. The component cancels the browser’s validation bubble, because that bubble cannot be styled, and writes the sentence itself. On a form that does not set `novalidate`, an invalid submit still does not fire `submit`. The case study sets `novalidate` so it can move focus to an error summary.
 
 ## CSS variables
 
@@ -217,13 +222,13 @@ Set them on the element or any ancestor. The field does not paint its own paper;
 | `--pp-accent` | `#7a3328` | Focus ring only. Not the error, and not the valid state. |
 | `--pp-font` | Fraunces, then Palatino | The value. Any family. Variable axes are optional. |
 | `--pp-meta-font` | JetBrains Mono, then ui-monospace | Label, helper, error. |
-| `--pp-weight-faint` | `450` | `wght` while idle, soft, or in error. |
-| `--pp-weight-inked` | `660` | `wght` once the value passes. |
-| `--pp-softness` | `0.72` | 0 to 1. Raises the `SOFT` axis and thins the ink. Capped so text stays above 4.5:1. |
-| `--pp-wobble` | `1.15` | Error travel, in pixels. `0` turns the wobble off. |
-| `--pp-deboss-depth` | `0.7` | Hard offset of the inked shadow, in pixels. `0` is flat. |
-| `--pp-duration` | `280ms` | Settle and wobble. A time, not a bare number. |
-| `--pp-opsz` | `32` | Optical size, when the font has the axis. |
+| `--pp-weight-faint` | `360` | `wght` while idle, soft, or in error. |
+| `--pp-weight-inked` | `780` | `wght` once the value passes. Keep this at 640 or above if the change should stay obvious. |
+| `--pp-softness` | `0.6` | 0 to 1. Raises the `SOFT` axis only. Ink density stays at 64%. |
+| `--pp-wobble` | `2.5` | Error travel, in pixels. `0` turns the wobble off. |
+| `--pp-deboss-depth` | `1.65` | Scale of the inked bite. `1` is already visible. `0` is flat. |
+| `--pp-duration` | `200ms` | Settle and wobble. A time, not a bare number. |
+| `--pp-opsz` | `24` | Optical size, when the font has the axis. |
 | `--pp-on-accent` | — | Not used by the field. The demo's submit button reads it. |
 
 `--pp-live-wght` and `--pp-live-soft` are internal. They animate between the faint and inked settings. Browsers that cannot interpolate custom properties snap, which is the same result as reduced motion.
@@ -240,11 +245,11 @@ If the font has no `SOFT` axis, that setting is ignored. If it has no `wght` axi
   --pp-accent: #7a3328;
   --pp-font: "Fraunces", Palatino, serif;
   --pp-meta-font: "JetBrains Mono", ui-monospace, monospace;
-  --pp-weight-faint: 450;
-  --pp-weight-inked: 660;
-  --pp-softness: 0.72;
-  --pp-deboss-depth: 0.7;
-  --pp-duration: 280ms;
+  --pp-weight-faint: 360;
+  --pp-weight-inked: 780;
+  --pp-softness: 0.6;
+  --pp-deboss-depth: 1.65;
+  --pp-duration: 200ms;
 }
 
 /* Captapage. Colors from the site. Space Grotesk stands in for Hosk Grotesk. */
@@ -254,8 +259,8 @@ If the font has no `SOFT` axis, that setting is ignored. If it has no `wght` axi
   --pp-accent: #2868ed;
   --pp-font: "Space Grotesk", "DM Sans", system-ui, sans-serif;
   --pp-meta-font: "DM Sans", system-ui, sans-serif;
-  --pp-weight-faint: 420;
-  --pp-weight-inked: 620;
+  --pp-weight-faint: 400;
+  --pp-weight-inked: 700;
 }
 
 /* Night */
@@ -272,11 +277,11 @@ The demo's controls write ink pressure to `--pp-weight-inked`, and softness, wob
 
 ## Reduced motion
 
-`prefers-reduced-motion: reduce` drops the transitions and the wobble animation inside the component stylesheet. The state still changes. The JS also refuses to add the wobble class when that media query matches, or when `--pp-wobble` is 0.
+`prefers-reduced-motion: reduce` drops the transitions and the wobble animation inside the component stylesheet. The state still changes. The JS also refuses to add the wobble class when that media query matches, or when `--pp-wobble` is 0. The case study’s red specimen also skips its shake. The submit button’s “Sending…” wait collapses to zero.
 
 ## Performance
 
-No canvas, no animation frame, no network inside the component. The stylesheet is one file. The demo loads four families because it has to show three themes; a product loads the one family it uses. Duration stays at or under 400ms.
+No canvas, no animation frame, no network inside the component. The stylesheet is one file. The demo loads four families because it has to show three themes; a product loads the one family it uses. Duration stays under 300ms. The rule’s box is reserved, so the settle does not move layout.
 
 ## How to graduate to kit/
 

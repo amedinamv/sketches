@@ -8,10 +8,11 @@ test('empty required email fails', () => {
   assert.equal(result.empty, true);
 });
 
-test('incomplete email stays invalid', () => {
+test('incomplete email stays invalid and names the fix', () => {
   const result = assess('ada@print', { validate: 'email', required: true });
   assert.equal(result.ok, false);
   assert.equal(result.empty, false);
+  assert.match(result.message, /name@studio\.com/);
 });
 
 test('complete email passes', () => {

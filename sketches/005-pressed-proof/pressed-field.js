@@ -47,14 +47,14 @@ export function assess(value, options = {}) {
 
   if (kind === 'email') {
     ok = EMAIL.test(text);
-    if (!ok) message = error || 'Enter a complete email address.';
+    if (!ok) message = error || 'Enter a complete email address, such as name@studio.com.';
   } else if (kind === 'phone') {
     ok = phoneOk(text);
-    if (!ok) message = error || 'Enter a full number, with country code.';
+    if (!ok) message = error || 'Enter a full number with a country code, such as +34 612 345 678.';
   } else if (kind === 'pattern') {
     const matched = patternOk(text, options.pattern);
     ok = matched.ok;
-    if (!ok) message = error || matched.message || 'This does not match the expected format.';
+    if (!ok) message = error || matched.message || 'Enter a value in the expected format.';
   } else if (minlength && [...text].length < minlength) {
     ok = false;
     message = error || `Enter at least ${minlength} characters.`;
@@ -63,7 +63,7 @@ export function assess(value, options = {}) {
   if (ok && kind !== 'pattern' && options.pattern) {
     const matched = patternOk(text, options.pattern);
     ok = matched.ok;
-    if (!ok) message = error || matched.message || 'This does not match the expected format.';
+    if (!ok)         message = error || matched.message || 'Enter a value in the expected format.';
   }
 
   if (ok && typeof options.validator === 'function') {
@@ -71,14 +71,14 @@ export function assess(value, options = {}) {
       const result = options.validator(text);
       if (result === false) {
         ok = false;
-        message = error || 'This value is not valid.';
+        message = error || 'Enter a value that fits this field.';
       } else if (typeof result === 'string' && result) {
         ok = false;
         message = result;
       }
     } catch {
       ok = false;
-      message = error || 'This value is not valid.';
+      message = error || 'Enter a value that fits this field.';
     }
   }
 
@@ -93,11 +93,11 @@ function normalizeKind(value) {
 }
 
 function emptyMessage(kind, minlength) {
-  if (kind === 'email') return 'Enter an email address.';
-  if (kind === 'phone') return 'Enter a phone number.';
-  if (kind === 'pattern') return 'This field is required.';
+  if (kind === 'email') return 'Enter an email address, such as name@studio.com.';
+  if (kind === 'phone') return 'Enter a phone number with a country code, such as +34 612 345 678.';
+  if (kind === 'pattern') return 'Enter a value.';
   if (minlength > 1) return `Enter at least ${minlength} characters.`;
-  return 'This field is required.';
+  return 'Enter a value.';
 }
 
 function phoneOk(text) {
@@ -131,8 +131,8 @@ function ensureStyles() {
 function registerAxes() {
   if (!globalThis.CSS || typeof CSS.registerProperty !== 'function') return;
   const defs = [
-    ['--pp-live-wght', '<number>', '450'],
-    ['--pp-live-soft', '<number>', '40'],
+    ['--pp-live-wght', '<number>', '360'],
+    ['--pp-live-soft', '<number>', '60'],
   ];
   for (const [name, syntax, initialValue] of defs) {
     try {
@@ -151,7 +151,7 @@ export class PressedField extends Base {
       'label', 'helper', 'error', 'validate', 'when', 'pattern', 'placeholder',
       'required', 'disabled', 'name', 'type', 'autocomplete', 'minlength',
       'maxlength', 'inputmode', 'autocapitalize', 'enterkeyhint', 'spellcheck',
-      'value', 'form',
+      'value', 'form', 'loading',
     ];
   }
 
@@ -161,6 +161,8 @@ export class PressedField extends Base {
     this._input = null;
     this._labelText = null;
     this._message = null;
+    this._copy = null;
+    this._sr = null;
     this._field = null;
     this._mounted = false;
     this._alive = false;
@@ -174,7 +176,10 @@ export class PressedField extends Base {
     this._wobbleTimer = 0;
     this._onInput = () => this._sync({ reason: 'input' });
     this._onBlur = () => this._sync({ reason: 'blur' });
-    this._onInvalid = () => this._sync({ reason: 'submit' });
+    this._onInvalid = (event) => {
+      event.preventDefault();
+      this._sync({ reason: 'submit' });
+    };
     this._onReset = () => {
       this._committed = false;
       requestAnimationFrame(() => this._sync({ silent: true }));
@@ -270,17 +275,25 @@ export class PressedField extends Base {
     const rule = document.createElement('span');
     rule.className = 'pp-rule';
     rule.setAttribute('aria-hidden', 'true');
-    label.append(labelText, field, rule);
+    field.append(rule);
+    label.append(labelText, field);
 
     const message = document.createElement('p');
     message.className = 'pp-message';
     message.id = `pp-msg-${++seq}`;
     message.setAttribute('aria-live', 'polite');
+    const sr = document.createElement('span');
+    sr.className = 'pp-sr';
+    const copy = document.createElement('span');
+    copy.className = 'pp-copy';
+    message.append(sr, copy);
 
     this.replaceChildren(label, message);
     this._input = input;
     this._labelText = labelText;
     this._message = message;
+    this._sr = sr;
+    this._copy = copy;
     this._field = field;
     this._mounted = true;
 
@@ -346,9 +359,22 @@ export class PressedField extends Base {
     else input.spellcheck = kind === 'text';
 
     input.required = this.hasAttribute('required');
-    input.disabled = this.hasAttribute('disabled') || this.disabled;
+    const disabled = this.hasAttribute('disabled') || this.disabled;
+    const loading = this.hasAttribute('loading');
+    input.disabled = Boolean(disabled);
+    input.readOnly = Boolean(loading) && !disabled;
     if (this.hasAttribute('required')) input.setAttribute('aria-required', 'true');
     else input.removeAttribute('aria-required');
+
+    if (loading) {
+      this.dataset.loading = '';
+      this.setAttribute('aria-busy', 'true');
+      input.setAttribute('aria-busy', 'true');
+    } else {
+      delete this.dataset.loading;
+      this.removeAttribute('aria-busy');
+      input.removeAttribute('aria-busy');
+    }
 
     if (!this._alive && this.hasAttribute('value')) input.value = this.getAttribute('value');
   }
@@ -394,13 +420,16 @@ export class PressedField extends Base {
     else input.removeAttribute('aria-errormessage');
 
     const helper = this.getAttribute('helper') || '';
-    const nextMessage = showError ? result.message : helper;
-    if (this._message.textContent !== nextMessage) this._message.textContent = nextMessage;
+    const loading = this.hasAttribute('loading');
+    const nextCopy = loading ? 'Checking…' : (showError ? result.message : helper);
+    const nextPrefix = !loading && showError ? 'Error: ' : '';
+    if (this._copy.textContent !== nextCopy) this._copy.textContent = nextCopy;
+    if (this._sr.textContent !== nextPrefix) this._sr.textContent = nextPrefix;
 
     if (result.ok) input.setCustomValidity('');
-    else input.setCustomValidity(result.message || 'This value is not valid.');
+    else input.setCustomValidity(result.message || 'Enter a value that fits this field.');
 
-    const becameError = showError && prevState !== 'error';
+    const becameError = showError && prevState !== 'error' && !loading && !input.disabled;
     if (becameError) this._wobble();
 
     if (!silent && this._alive && this._prevOk !== result.ok) {
