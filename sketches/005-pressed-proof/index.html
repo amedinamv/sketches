@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en" data-frame="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Pressed Proof</title>
+  <meta name="description" content="Form fields whose type takes ink as the value becomes valid. Faint while incomplete, crisp once it settles." />
+  <meta name="theme-color" content="#f3efe6" />
+  <meta name="color-scheme" content="light" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23f3efe6'/%3E%3Cpath d='M3 12h10' stroke='%231c1a17' stroke-width='1'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..600&family=Fraunces:SOFT,opsz,wght@0..100,9..144,300..900&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400..700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./pressed-field.css" />
+  <script>
+    if (new URLSearchParams(location.search).has('poster')) {
+      document.documentElement.style.setProperty('--frame-offset', '0px');
+    }
+  </script>
+  <style>
+    :root {
+      --bench: #f3efe6;
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bench); color: var(--pp-ink, #1c1a17); }
+    body {
+      min-height: 100dvh;
+      padding:
+        var(--frame-offset, calc(36px + env(safe-area-inset-top, 0px)))
+        max(0px, env(safe-area-inset-right))
+        max(28px, env(safe-area-inset-bottom))
+        max(0px, env(safe-area-inset-left));
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .skip {
+      position: absolute;
+      left: 12px;
+      top: calc(var(--frame-offset, 36px) + 8px);
+      z-index: 6;
+      padding: 8px 12px;
+      background: var(--bench);
+      color: #1c1a17;
+      font: 500 12px/1 "JetBrains Mono", ui-monospace, monospace;
+      transform: translateY(-160%);
+    }
+    .skip:focus { transform: none; outline: 1px solid #1c1a17; outline-offset: 3px; }
+
+    .sheet {
+      --pp-ink: #1c1a17;
+      --pp-paper: #f3efe6;
+      --pp-accent: #7a3328;
+      --pp-on-accent: #f7f3ec;
+      --pp-font: "Fraunces", "Iowan Old Style", Palatino, "Palatino Linotype", serif;
+      --pp-meta-font: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+      --pp-weight-faint: 450;
+      --pp-weight-inked: 660;
+      --pp-softness: 0.72;
+      --pp-wobble: 1.15;
+      --pp-deboss-depth: 0.7;
+      --pp-duration: 280ms;
+      --pp-opsz: 32;
+      width: min(34rem, 100%);
+      margin: 0 auto;
+      padding: clamp(28px, 6vw, 64px) clamp(20px, 5vw, 28px) clamp(36px, 8vw, 80px);
+      color: var(--pp-ink);
+      background: transparent;
+    }
+
+    .sheet[data-preset="captapage"] {
+      --pp-ink: #171927;
+      --pp-paper: #f8f9ff;
+      --pp-accent: #2868ed;
+      --pp-on-accent: #ffffff;
+      --pp-font: "Space Grotesk", "DM Sans", system-ui, sans-serif;
+      --pp-meta-font: "DM Sans", "Space Grotesk", system-ui, sans-serif;
+      --pp-weight-faint: 420;
+      --pp-weight-inked: 620;
+      --pp-softness: 0.62;
+      --pp-wobble: 1;
+      --pp-deboss-depth: 0.45;
+      --pp-duration: 240ms;
+      color-scheme: light;
+    }
+
+    .sheet[data-preset="night"] {
+      --pp-ink: #f3efe6;
+      --pp-paper: #161513;
+      --pp-accent: #e3a06a;
+      --pp-on-accent: #161513;
+      --pp-font: "Fraunces", "Iowan Old Style", Palatino, "Palatino Linotype", serif;
+      --pp-meta-font: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+      --pp-weight-faint: 450;
+      --pp-weight-inked: 680;
+      --pp-softness: 0.8;
+      --pp-wobble: 1.15;
+      --pp-deboss-depth: 0.85;
+      --pp-duration: 280ms;
+      color-scheme: dark;
+    }
+
+    .sheet:not([data-preset="proof"]) {
+      width: min(34rem, calc(100% - 32px));
+      margin: clamp(16px, 4vw, 28px) auto clamp(28px, 6vw, 48px);
+      padding: clamp(24px, 4vw, 36px) clamp(18px, 4vw, 28px) clamp(28px, 5vw, 40px);
+      background: var(--pp-paper);
+      border: 1px solid color-mix(in srgb, var(--pp-ink) 16%, transparent);
+    }
+
+    .kicker {
+      margin: 0;
+      font: 500 12px/1.4 var(--pp-meta-font);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: color-mix(in srgb, var(--pp-ink) 72%, var(--pp-paper));
+    }
+
+    h1 {
+      margin: 10px 0 0;
+      font-family: var(--pp-font);
+      font-weight: 560;
+      font-variation-settings: "SOFT" 14, "opsz" 80, "wght" 560;
+      font-optical-sizing: none;
+      font-size: clamp(2.15rem, 5vw, 3.25rem);
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+    }
+
+    .lede {
+      margin: 14px 0 0;
+      max-width: 34ch;
+      font-family: var(--pp-font);
+      font-weight: 440;
+      font-variation-settings: "SOFT" 28, "opsz" 24, "wght" 440;
+      font-size: 1.125rem;
+      line-height: 1.45;
+      color: color-mix(in srgb, var(--pp-ink) 78%, var(--pp-paper));
+    }
+
+    form {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid color-mix(in srgb, var(--pp-ink) 22%, transparent);
+      display: grid;
+      gap: 22px;
+      min-width: 0;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 18px;
+      margin-top: 4px;
+    }
+
+    .submit {
+      appearance: none;
+      border: 0;
+      background: var(--pp-accent);
+      color: var(--pp-on-accent);
+      font: 500 15px/1 var(--pp-meta-font);
+      letter-spacing: 0.01em;
+      min-height: 48px;
+      padding: 0 22px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .submit:focus { outline: none; }
+    .submit:focus-visible {
+      outline: 1px solid var(--pp-ink);
+      outline-offset: 3px;
+    }
+    .submit:active { transform: translateY(1px); }
+
+    .status {
+      margin: 0;
+      min-height: 1.45em;
+      flex: 1 1 12rem;
+      font: 400 13px/1.45 var(--pp-meta-font);
+      color: color-mix(in srgb, var(--pp-ink) 72%, var(--pp-paper));
+    }
+
+    [data-frame-controls] select {
+      width: 100%;
+      min-height: 32px;
+      margin: 0;
+      padding: 4px 0;
+      border: 0;
+      border-bottom: 1px solid var(--frame-line, #c9bfb0);
+      border-radius: 0;
+      background: transparent;
+      color: var(--frame-ink, #1c1a17);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    @media (max-width: 560px) {
+      .sheet:not([data-preset="proof"]) { width: min(34rem, calc(100% - 24px)); }
+      .actions { align-items: stretch; }
+      .submit { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .submit:active { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#proof">Skip to form</a>
+
+  <div id="frame-controls" data-frame-controls hidden>
+    <p data-frame-hint>
+      <span data-when="fine">Type in a field.</span><span data-when="coarse">Tap a field and type.</span>
+      Incomplete letters stay light. A valid line takes the ink.
+    </p>
+    <div class="fields">
+      <label>
+        <span>preset</span>
+        <select id="preset">
+          <option value="proof">Proof room</option>
+          <option value="captapage">Captapage</option>
+          <option value="night">Night</option>
+        </select>
+      </label>
+      <label>
+        <span>ink pressure <output id="pressure-out">660</output></span>
+        <input id="pressure" type="range" min="520" max="780" step="10" value="660" />
+      </label>
+      <label>
+        <span>softness <output id="softness-out">0.72</output></span>
+        <input id="softness" type="range" min="0" max="1" step="0.02" value="0.72" />
+      </label>
+      <label>
+        <span>wobble <output id="wobble-out">1.15</output></span>
+        <input id="wobble" type="range" min="0" max="3" step="0.05" value="1.15" />
+      </label>
+      <label>
+        <span>deboss <output id="deboss-out">0.70</output></span>
+        <input id="deboss" type="range" min="0" max="2" step="0.05" value="0.70" />
+      </label>
+      <label>
+        <span>speed <output id="speed-out">280 ms</output></span>
+        <input id="speed" type="range" min="0" max="400" step="10" value="280" />
+      </label>
+    </div>
+  </div>
+
+  <main class="sheet" id="sheet" data-preset="proof">
+    <header class="intro">
+      <p class="kicker" id="kicker">Proof room</p>
+      <h1>Pressed proof</h1>
+      <p class="lede">Faint until the line is true. Then the type takes the ink.</p>
+    </header>
+
+    <form id="proof" action="#proof" method="post">
+      <pressed-field
+        name="email"
+        label="Email"
+        validate="email"
+        when="blur"
+        autocomplete="email"
+        placeholder="name@studio.com"
+        helper="Where the proof should go."
+        error="Enter a complete email address."
+        required
+      >
+        <label>
+          Email
+          <input name="email" type="email" autocomplete="email" placeholder="name@studio.com" required />
+        </label>
+      </pressed-field>
+
+      <pressed-field
+        name="name"
+        label="Name"
+        validate="text"
+        when="blur"
+        autocomplete="name"
+        placeholder="Ada Marlowe"
+        minlength="2"
+        helper="The name printed on the proof."
+        error="Enter at least two characters."
+        required
+      >
+        <label>
+          Name
+          <input name="name" type="text" autocomplete="name" placeholder="Ada Marlowe" minlength="2" required />
+        </label>
+      </pressed-field>
+
+      <pressed-field
+        name="whatsapp"
+        label="WhatsApp"
+        validate="whatsapp"
+        when="input"
+        autocomplete="tel"
+        placeholder="+34 612 345 678"
+        enterkeyhint="send"
+        helper="Country code first. Spaces are fine."
+        error="Enter a full number, with country code."
+        required
+      >
+        <label>
+          WhatsApp
+          <input name="whatsapp" type="tel" autocomplete="tel" inputmode="tel" placeholder="+34 612 345 678" required />
+        </label>
+      </pressed-field>
+
+      <div class="actions">
+        <button class="submit" type="submit">Send proof</button>
+        <p class="status" id="status" role="status"></p>
+      </div>
+    </form>
+  </main>
+
+  <script type="module" src="./pressed-field.js"></script>
+  <script type="module">
+    const sheet = document.getElementById('sheet');
+    const form = document.getElementById('proof');
+    const status = document.getElementById('status');
+    const kicker = document.getElementById('kicker');
+    const preset = document.getElementById('preset');
+    const params = new URLSearchParams(location.search);
+
+    const PRESETS = {
+      proof: { label: 'Proof room', pressure: 660, softness: 0.72, wobble: 1.15, deboss: 0.70, speed: 280 },
+      captapage: { label: 'Captapage', pressure: 620, softness: 0.62, wobble: 1, deboss: 0.45, speed: 240 },
+      night: { label: 'Night proof', pressure: 680, softness: 0.80, wobble: 1.15, deboss: 0.85, speed: 280 },
+    };
+
+    const pressure = document.getElementById('pressure');
+    const softness = document.getElementById('softness');
+    const wobble = document.getElementById('wobble');
+    const deboss = document.getElementById('deboss');
+    const speed = document.getElementById('speed');
+    const pressureOut = document.getElementById('pressure-out');
+    const softnessOut = document.getElementById('softness-out');
+    const wobbleOut = document.getElementById('wobble-out');
+    const debossOut = document.getElementById('deboss-out');
+    const speedOut = document.getElementById('speed-out');
+
+    function applyKnobs() {
+      sheet.style.setProperty('--pp-weight-inked', pressure.value);
+      sheet.style.setProperty('--pp-softness', softness.value);
+      sheet.style.setProperty('--pp-wobble', wobble.value);
+      sheet.style.setProperty('--pp-deboss-depth', deboss.value);
+      sheet.style.setProperty('--pp-duration', `${speed.value}ms`);
+      pressureOut.textContent = pressure.value;
+      softnessOut.textContent = Number(softness.value).toFixed(2);
+      wobbleOut.textContent = Number(wobble.value).toFixed(2);
+      debossOut.textContent = Number(deboss.value).toFixed(2);
+      speedOut.textContent = `${speed.value} ms`;
+    }
+
+    function applyPreset(name) {
+      const next = PRESETS[name] || PRESETS.proof;
+      sheet.dataset.preset = PRESETS[name] ? name : 'proof';
+      kicker.textContent = next.label;
+      pressure.value = String(next.pressure);
+      softness.value = String(next.softness);
+      wobble.value = String(next.wobble);
+      deboss.value = String(next.deboss);
+      speed.value = String(next.speed);
+      applyKnobs();
+    }
+
+    for (const input of [pressure, softness, wobble, deboss, speed]) {
+      input.addEventListener('input', applyKnobs);
+    }
+    preset.addEventListener('change', () => applyPreset(preset.value));
+    applyPreset('proof');
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      status.textContent = 'Held on this page. Nothing was sent.';
+    });
+
+    if (params.has('poster')) {
+      const set = (name, value) => {
+        const field = form.querySelector(`pressed-field[name="${name}"]`);
+        if (field) field.value = value;
+      };
+      set('email', 'ada@print');
+      set('name', 'Ada Marlowe');
+      set('whatsapp', '+34 612 345 678');
+    }
+  </script>
+  <script src="/shared/frame.js"></script>
+</body>
+</html>

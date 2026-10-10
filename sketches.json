@@ -1,5 +1,20 @@
 [
   {
+    "slug": "005-pressed-proof",
+    "title": "Pressed Proof",
+    "date": "2026-10-10",
+    "tags": ["form", "type", "variable-font"],
+    "description": "Form fields whose type takes ink as the value becomes valid. Faint while incomplete, crisp and lightly debossed once it settles.",
+    "job": "Form field",
+    "problem": "A red outline is easy to miss, and some people cannot see it. A field should say in the type itself whether the line is finished.",
+    "interaction": "Typed text stays light and soft while it is incomplete. A valid value settles into heavier, sharper type with a shallow deboss. An error wobbles once and the reason is written under the line.",
+    "technique": "A custom element, pressed-field, with the input in light DOM so a native form still submits and validates. Fraunces SOFT and wght carry the impression. Fonts without those axes fall back to weight and ink density. Events pp:valid and pp:invalid.",
+    "ship": "The element in a lead form: email, name, WhatsApp, submit. Drop the preset switcher and the knobs. Keep the helper, the weight, one wobble, and an instant cut when reduced motion is on.",
+    "palette": ["#f3efe6", "#1c1a17", "#5c5852", "#7a3328"],
+    "status": "preview",
+    "poster": "/sketches/005-pressed-proof/poster.png"
+  },
+  {
     "slug": "004-material-picker",
     "title": "Material Picker",
     "date": "2026-10-02",
